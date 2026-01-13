@@ -379,6 +379,9 @@
                         <button onclick="openPdfConfigModal()" class="btn btn-secondary" style="background: #17a2b8; color: white;">
                             📄 Générer PDF du sujet
                         </button>
+                        <button onclick="openExportPackModal()" class="btn btn-secondary" style="background: #28a745; color: white;">
+                            📦 Exporter Pack Sujet
+                        </button>
                         <button onclick="continueToCandidates()" id="btnContinueToCandidates" class="btn-continue" disabled>
                             Continuer vers les candidats →
                         </button>
@@ -1319,12 +1322,167 @@
         </div>
     </div>
 
+    <!-- === MODALE EXPORT PACK SUJET === -->
+    <div id="exportPackModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <h3 style="margin: 0; color: white; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 28px;">📦</span>
+                    <div>
+                        <div style="font-size: 1.3em;">Exporter le Pack Sujet</div>
+                        <div style="font-size: 0.9em; opacity: 0.9; margin-top: 4px;">Partagez ce sujet avec les correcteurs</div>
+                    </div>
+                </h3>
+                <button onclick="closeExportPackModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; border-radius: 50%; width: 36px; height: 36px;">×</button>
+            </div>
+
+            <div style="padding: 24px;">
+                <!-- Nom du sujet -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #2c3e50;">
+                        Nom du sujet
+                    </label>
+                    <input type="text" id="packSubjectName" placeholder="Ex: DNB Blanc N°1 - Janvier 2026"
+                           style="width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1em;">
+                </div>
+
+                <!-- Récapitulatif -->
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 12px 0; color: #2c3e50;">📋 Contenu du pack</h4>
+                    <div id="packSummary" style="color: #666; font-size: 0.95em; line-height: 1.6;">
+                        <!-- Généré dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Options d'export -->
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    <!-- Fichier JSON -->
+                    <button onclick="downloadPackJSON()" style="
+                        padding: 16px 20px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 10px;
+                        font-size: 1em;
+                        font-weight: 600;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                        <span style="font-size: 1.5em;">💾</span>
+                        <div style="text-align: left;">
+                            <div>Télécharger le fichier JSON</div>
+                            <div style="font-size: 0.85em; opacity: 0.9;">À envoyer par email ou clé USB</div>
+                        </div>
+                    </button>
+
+                    <!-- Lien URL -->
+                    <div style="background: #e3f2fd; padding: 16px; border-radius: 10px; border: 2px solid #90caf9;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <span style="font-size: 1.5em;">🔗</span>
+                            <div style="font-weight: 600; color: #1565c0;">Lien de partage</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="packShareUrl" readonly
+                                   style="flex: 1; padding: 10px; border: 1px solid #90caf9; border-radius: 6px; font-size: 0.9em; background: white;">
+                            <button onclick="copyPackUrl()" style="
+                                padding: 10px 16px;
+                                background: #1565c0;
+                                color: white;
+                                border: none;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-weight: 600;
+                            ">Copier</button>
+                        </div>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85em; color: #666;">
+                            Les correcteurs peuvent ouvrir ce lien pour charger le sujet automatiquement
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Bouton fermer -->
+                <button onclick="closeExportPackModal()" style="
+                    width: 100%;
+                    padding: 12px;
+                    background: #6c757d;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 1em;
+                    cursor: pointer;
+                ">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODALE RÉCAPITULATIF PACK (pour correcteurs) === -->
+    <div id="packRecapModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h3 style="margin: 0; color: white; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 28px;">📋</span>
+                    <div>
+                        <div style="font-size: 1.3em;" id="packRecapTitle">Récapitulatif du sujet</div>
+                        <div style="font-size: 0.9em; opacity: 0.9; margin-top: 4px;">Vérifiez le contenu avant de commencer</div>
+                    </div>
+                </h3>
+            </div>
+
+            <div style="padding: 24px;">
+                <!-- Infos générales -->
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <div id="packRecapInfo" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <!-- Généré dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Liste des exercices -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 12px 0; color: #2c3e50;">📚 Exercices du sujet</h4>
+                    <div id="packRecapExercises" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Généré dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="closePackRecapModal(); window.location.href='index.html';" style="
+                        flex: 1;
+                        padding: 14px;
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1em;
+                        cursor: pointer;
+                    ">Annuler</button>
+                    <button onclick="startCorrectionFromPack()" style="
+                        flex: 2;
+                        padding: 14px;
+                        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 1.1em;
+                        font-weight: 600;
+                        cursor: pointer;
+                    ">Commencer la correction →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/state/appState.js?v=20251105017"></script>
     <script src="js/workflow.js?v=20251105017"></script>
     <!-- Mode test JSON (optionnel) -->
     <script src="js/modules/importJSON.js?v=20251105017"></script>
     <!-- Module de génération PDF -->
     <script src="js/modules/pdfGenerator.js?v=20251110003"></script>
+    <!-- Module de gestion des packs sujet -->
+    <script src="js/modules/packManager.js?v=20260113001"></script>
     <script src="js/app.js?v=20251105017"></script>
 </body>
 </html>
