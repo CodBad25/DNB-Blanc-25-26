@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <style>
+      @keyframes rotate3d {
+        0% { transform: rotateY(0deg) rotateX(0deg); }
+        100% { transform: rotateY(360deg) rotateX(360deg); }
+      }
+
+      .cube-container {
+        transform-origin: 50% 50%;
+        animation: rotate3d 8s infinite linear;
+        transform-style: preserve-3d;
+      }
+
+      .face {
+        fill: #FF6B35;
+        stroke: #D55028;
+        stroke-width: 1;
+      }
+
+      .face-front { fill: #FF6B35; }
+      .face-back { fill: #CC5429; }
+      .face-right { fill: #E65F31; }
+      .face-left { fill: #D55028; }
+      .face-top { fill: #FF7D4D; }
+      .face-bottom { fill: #B84825; }
+    </style>
+  </defs>
+
+  <g class="cube-container">
+    <!-- Simplified 2D cube with 3D effect -->
+    <g transform="translate(50, 50)">
+      <!-- Top face -->
+      <polygon class="face face-top" points="-20,-15 0,-25 20,-15 0,-5" />
+
+      <!-- Left face -->
+      <polygon class="face face-left" points="-20,-15 -20,15 0,25 0,-5" />
+
+      <!-- Right face -->
+      <polygon class="face face-right" points="20,-15 20,15 0,25 0,-5" />
+
+      <!-- Mathematical symbols on faces -->
+      <text x="-10" y="10" font-size="12" fill="white" font-weight="bold">∫</text>
+      <text x="5" y="10" font-size="12" fill="white" font-weight="bold">π</text>
+      <text x="-5" y="-10" font-size="10" fill="white" font-weight="bold">√</text>
+    </g>
+  </g>
+</svg>

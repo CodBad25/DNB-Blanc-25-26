@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correcteur Universel - DNB</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+    <!-- Scratchblocks pour rendu des blocs Scratch -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scratchblocks@3.6.4/build/scratchblocks.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/scratchblocks@3.6.4/build/scratchblocks.min.js"></script>
+    <!-- Bibliothèques PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/data/dictionnaireDNB.js?v=20251105004"></script>
+    <script src="js/data/dictionnaireAutomatismes.js?v=20251105004"></script>
+    <script src="js/modules/mathaleaUtils.js?v=20251105004"></script>
+    <script src="js/modules/generateursAutomatismes.js?v=20251105004"></script>
+    <!-- MathALÉA Integration via RPC (comme Capytale) -->
+    <script type="module" src="js/rpc-wrapper.js"></script>
+    <link rel="stylesheet" href="css/main.css?v=20251106002">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        .top-bar h1 {
+            color: white;
+            font-size: 1.2em;
+            margin: 0;
+        }
+        .top-bar button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+            margin-left: 10px;
+        }
+        .top-bar button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .top-bar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        #contentWrapper {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barre supérieure compacte -->
+    <div class="top-bar">
+        <h1>📚 Correcteur Universel - DNB</h1>
+        <div class="top-bar-buttons">
+            <button onclick="window.location.href='index.html'">← Retour à l'accueil</button>
+            <button onclick="toggleParametresPanel()" id="parametresBtnHeader">🎛️ Paramètres</button>
+            <button onclick="toggleAdminPanel()" id="adminToggleBtnHeader">⚙️ Admin</button>
+        </div>
+    </div>
+
+    <!-- Wrapper pour le contenu scrollable -->
+    <div id="contentWrapper">
+    <div class="container">
+        <!-- === ÉCRAN DE CONFIGURATION INITIAL === -->
+        <div class="dnb-selection-page" id="configurationPage" style="display: none;">
+            <div style="max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 64px; margin-bottom: 15px;">📚</div>
+                    <h2 style="color: #2c3e50; margin-bottom: 10px;">Configuration du sujet</h2>
+                    <p style="color: #666;">Personnalisez votre session de correction avant de commencer</p>
+                </div>
+
+                <!-- Option 1: Automatismes -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 2px solid #dee2e6;">
+                    <label style="display: flex; align-items: start; gap: 15px; cursor: pointer;">
+                        <input type="checkbox" id="skipAutomatismes" style="width: 22px; height: 22px; margin-top: 3px; cursor: pointer;">
+                        <div>
+                            <div style="font-weight: 600; color: #2c3e50; font-size: 1.1em; margin-bottom: 5px;">
+                                🎯 Passer l'exercice 1 (Automatismes)
+                            </div>
+                            <div style="color: #666; font-size: 0.95em;">
+                                Commencer directement avec la sélection des exercices DNB sans configurer les automatismes
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Option 2: Écrans d'aide -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 2px solid #dee2e6;">
+                    <label style="display: flex; align-items: start; gap: 15px; cursor: pointer;">
+                        <input type="checkbox" id="disableGuidance" style="width: 22px; height: 22px; margin-top: 3px; cursor: pointer;">
+                        <div>
+                            <div style="font-weight: 600; color: #2c3e50; font-size: 1.1em; margin-bottom: 5px;">
+                                💡 Désactiver les écrans d'aide
+                            </div>
+                            <div style="color: #666; font-size: 0.95em;">
+                                Ne pas afficher les fenêtres d'explication à chaque étape (recommandé pour les utilisateurs expérimentés)
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <button onclick="startWithConfiguration()" style="
+                    width: 100%;
+                    padding: 16px 30px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 1.1em;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)';"
+                   onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)';">
+                    Commencer la création du sujet →
+                </button>
+
+                <p style="text-align: center; margin-top: 15px; color: #999; font-size: 0.9em;">
+                    Ces préférences sont sauvegardées pour vos prochaines sessions
+                </p>
+            </div>
+        </div>
+
+        <!-- === PAGE DE SÉLECTION AUTOMATISMES (Exercice 1) === -->
+        <div class="dnb-selection-page" id="automatismesSelectionPage" style="display: none;">
+            <div class="page-header" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h2 style="color: #2c3e50; margin-bottom: 10px;">🎯 Sélection des automatismes (Exercice 1 - 6 points)</h2>
+                <p style="color: #666;">Choisissez les questions d'automatismes depuis MathALÉA pour composer votre exercice 1</p>
+            </div>
+
+            <!-- Barre de sélection sticky -->
+            <div class="selection-bar" id="automatismesSelectionBar">
+                <div class="selection-info">
+                    <span id="automatismesCount">0 automatisme sélectionné</span>
+                    <span style="margin: 0 15px; color: #666;">|</span>
+                    <span id="automatismesPoints">Total: 0 / 6 points</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="skipAutomatismesStep()" style="background: #6c757d; color: white;">
+                        Passer cette étape →
+                    </button>
+                    <button class="btn btn-primary" id="btnContinueAutomatismes" onclick="continueFromAutomatismes()">
+                        Continuer avec les exercices DNB →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Aperçu Exercice 1 -->
+            <div id="exercice1Preview" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #4285f4; display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #2c3e50; margin: 0;">📝 Aperçu Exercice 1 - Automatismes</h3>
+                    <button onclick="toggleExercice1Preview()" style="padding: 5px 10px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                        <span id="previewToggleText">▼</span>
+                    </button>
+                </div>
+                <div id="exercice1PreviewContent" style="max-height: 400px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <p style="color: #666; font-style: italic;">Sélectionnez des automatismes pour voir l'aperçu de l'exercice 1...</p>
+                </div>
+            </div>
+
+            <!-- Filtres et recherche -->
+            <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="searchAutomatismes" placeholder="🔍 Rechercher par titre, id..." 
+                           style="flex: 1; min-width: 250px; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px;"
+                           oninput="filterAutomatismes()">
+                    
+                    <select id="categorieFilterAutomatismes" 
+                            style="padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 14px; cursor: pointer;"
+                            onchange="filterAutomatismes()">
+                        <option value="">Toutes les catégories</option>
+                        <option value="3AutoN">Nombres et calculs</option>
+                        <option value="3AutoG">Géométrie</option>
+                        <option value="3AutoP">Proportionnalité/Probabilités</option>
+                        <option value="3AutoI">Informatique</option>
+                    </select>
+                    
+                    <button class="btn btn-secondary" onclick="clearAutomatismesFilters()" style="white-space: nowrap;">
+                        Effacer les filtres
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grille des automatismes -->
+            <div id="automatismesGrid" class="exercises-grid"></div>
+        </div>
+
+        <!-- === PAGE DE SÉLECTION DNB === -->
+        <div class="dnb-selection-page" id="dnbSelectionPage">
+            <div class="page-header" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h2 style="color: #2c3e50; margin-bottom: 10px;">📚 Sélection des exercices DNB</h2>
+                <p style="color: #666;">Choisissez les exercices depuis la base MathALÉA pour composer votre sujet</p>
+            </div>
+
+            <!-- Barre de sélection sticky -->
+            <div class="selection-bar" id="selectionBar">
+                <div class="selection-info">
+                    <span id="selectionCount">0 exercice sélectionné</span>
+                </div>
+                <button class="btn-continue" id="btnContinue" onclick="continueToSetup()" disabled>
+                    Continuer avec les exercices sélectionnés →
+                </button>
+            </div>
+
+            <!-- Filtres -->
+            <div class="filters-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #2c3e50; margin: 0;">Filtres</h3>
+                    <button id="btnClearFilters" onclick="clearAllFilters()" style="
+                        padding: 8px 16px;
+                        background: #dc3545;
+                        color: white;
+                        border: none;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 13px;
+                        display: none;
+                        transition: all 0.2s;
+                    " onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                        🗑️ Réinitialiser les filtres
+                    </button>
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="filterYear">Année</label>
+                        <select id="filterYear" onchange="applyFilters()">
+                            <option value="">Toutes les années</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterTheme">Thème</label>
+                        <select id="filterTheme" onchange="applyFilters()">
+                            <option value="">Tous les thèmes</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterSearch">Recherche intelligente</label>
+                        <div style="position: relative;">
+                            <input type="text" id="filterSearch" placeholder="Ex: pythagore, 2013 proba, asie+pondichery..." oninput="applyFilters()" style="width: 100%; padding-right: 35px;">
+                            <button id="btnClearSearch" onclick="clearSearch()" style="
+                                position: absolute;
+                                right: 5px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                background: #6c757d;
+                                color: white;
+                                border: none;
+                                border-radius: 50%;
+                                width: 24px;
+                                height: 24px;
+                                cursor: pointer;
+                                font-size: 16px;
+                                line-height: 1;
+                                display: none;
+                                transition: all 0.2s;
+                            " onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'">
+                                ×
+                            </button>
+                        </div>
+                        <small style="display: block; margin-top: 5px; color: #666; font-size: 0.85em;">
+                            Utilisez + pour OU (ex: asie+pondichery), espace pour ET (ex: 2013 proba)
+                        </small>
+                    </div>
+                </div>
+                <div id="filterResults" style="margin-top: 15px; color: #666; font-size: 14px; font-weight: 500;"></div>
+                <div id="activeFiltersIndicator" style="
+                    margin-top: 10px;
+                    padding: 12px;
+                    background: #fff3cd;
+                    border-left: 4px solid #ffc107;
+                    border-radius: 6px;
+                    display: none;
+                    font-size: 14px;
+                    color: #856404;
+                ">
+                    ⚠️ <strong>Filtres actifs :</strong> <span id="activeFiltersList"></span>
+                </div>
+            </div>
+
+            <!-- Grille d'exercices -->
+            <div class="exercises-grid" id="exercisesGrid"></div>
+        </div>
+
+        <!-- Modal de prévisualisation -->
+        <div class="preview-modal" id="previewModal">
+            <div class="preview-content">
+                <button class="preview-close" onclick="closePreview()">×</button>
+                <div id="previewBody"></div>
+            </div>
+        </div>
+
+        <!-- === PAGE MATHALÉA (IFRAME + RPC) === -->
+        <div class="dnb-selection-page" id="mathaleaPage" style="display: none;">
+            <div class="page-header" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h2 style="color: #2c3e50; margin-bottom: 10px;">🎓 Sélection d'exercices MathALÉA</h2>
+                <p style="color: #666;">Sélectionnez vos exercices directement depuis MathALÉA</p>
+
+                <!-- Configuration source MathALÉA -->
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <label style="display: flex; align-items: center; gap: 10px; font-weight: 500;">
+                        <span>Source MathALÉA:</span>
+                        <select id="mathaleaSourceSelect" onchange="updateMathaleaSource()" style="padding: 8px; border: 2px solid #dee2e6; border-radius: 6px;">
+                            <option value="prod">Production (coopmaths.fr)</option>
+                            <option value="local" selected>Local (localhost:8080)</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Iframe MathALÉA (créé dynamiquement pour éviter chargement prématuré) -->
+            <div id="mathaleaFrameContainer" style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <!-- L'iframe sera inséré ici dynamiquement par initMathaleaPage() -->
+            </div>
+
+            <!-- Actions -->
+            <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
+                <button onclick="retourAccueil()" class="btn btn-secondary">
+                    ← Retour à l'accueil
+                </button>
+                <button onclick="validerSelectionMathALEA()" class="btn btn-primary">
+                    Valider la sélection →
+                </button>
+            </div>
+        </div>
+
+        <!-- === PAGE DE CONCEPTION DU BARÈME === -->
+        <div class="main-page" id="baremeDesignPage">
+            <div class="page-header" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                <h2 style="color: #2c3e50; margin-bottom: 10px;">⚖️ Conception du barème</h2>
+                <p style="color: #666;">Définissez les compétences et les points pour chaque exercice</p>
+                <button onclick="goBackToSelection()" style="margin-top: 10px; padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                    ← Retour à la sélection
+                </button>
+            </div>
+
+            <!-- Indicateur de total -->
+            <div id="totalPointsIndicator" style="position: sticky; top: 80px; z-index: 100; background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #dee2e6; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px;">
+                    <div style="flex: 1;">
+                        <div style="margin-bottom: 10px;">
+                            <strong style="font-size: 1.1em;">Total du barème :</strong>
+                            <span id="currentTotal" style="font-size: 1.3em; font-weight: bold; color: #28a745; margin-left: 10px;">0</span>
+                            <span style="font-size: 1.1em; color: #666;"> / 20 points</span>
+                        </div>
+                        <div id="totalDetails" style="padding-left: 10px; border-left: 3px solid #e0e0e0;">
+                            <!-- Détail par exercice généré dynamiquement -->
+                        </div>
+                        <div id="competencesSummary" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #e9ecef;">
+                            <strong style="display: block; margin-bottom: 8px; color: #2c3e50;">📊 Compétences évaluées :</strong>
+                            <div id="competencesSummaryContent" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 80px; overflow-y: auto; padding-right: 10px;">
+                                <!-- Résumé des compétences généré dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                        <button onclick="openPdfConfigModal()" class="btn btn-secondary" style="background: #17a2b8; color: white;">
+                            📄 Générer PDF du sujet
+                        </button>
+                        <button onclick="continueToCandidates()" id="btnContinueToCandidates" class="btn-continue" disabled>
+                            Continuer vers les candidats →
+                        </button>
+                    </div>
+                </div>
+                <div id="totalWarning" style="margin-top: 10px; display: none; padding: 10px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; color: #856404;">
+                    ⚠️ Le total dépasse 100 points
+                </div>
+            </div>
+
+            <!-- Onglets des exercices -->
+            <div id="baremeExerciseTabs" style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <!-- Les onglets seront générés dynamiquement -->
+            </div>
+
+            <!-- Conteneur du contenu de l'exercice sélectionné -->
+            <div id="baremeExerciseContent" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-height: 60vh; overflow-y: auto;">
+                <!-- Le contenu de l'exercice sélectionné sera généré ici -->
+            </div>
+        </div>
+
+        <!-- === PAGE DE CONFIGURATION === -->
+        <div class="setup-page" id="setupPage" style="display: none;">
+            <div class="setup-card">
+                <div class="setup-title">
+                    👥 Sélection des candidats
+                </div>
+                
+                <p style="background: #e3f2fd; padding: 12px; border-radius: 6px; margin-bottom: 15px; color: #1565c0; font-size: 0.9em;">
+                    <strong>Information :</strong> Choisissez votre méthode de sélection des candidats. 
+                    À l'étape suivante, vous pourrez éliminer ceux qui ne font pas partie de votre paquet.
+                </p>
+
+                <!-- Onglets de méthode de sélection -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+                    <button id="tabManual" class="candidate-tab active" onclick="switchCandidateTab('manual')">
+                        ✏️ Saisie manuelle
+                    </button>
+                    <button id="tabCsv" class="candidate-tab" onclick="switchCandidateTab('csv')">
+                        📄 Import CSV
+                    </button>
+                </div>
+
+                <!-- Méthode 1 : Saisie manuelle -->
+                <div id="manualInput" class="candidate-method">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startNumber">Numéro de début</label>
+                            <input type="number" id="startNumber" placeholder="Ex: 150" value="150">
+                        </div>
+                        <div class="form-group">
+                            <label for="endNumber">Numéro de fin</label>
+                            <input type="number" id="endNumber" placeholder="Ex: 170" value="170">
+                        </div>
+                    </div>
+
+                    <div class="candidates-preview" id="candidatesPreview">
+                        Aperçu : 21 candidats (150 à 170)
+                    </div>
+                </div>
+
+                <!-- Méthode 2 : Import CSV -->
+                <div id="csvInput" class="candidate-method" style="display: none;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <p style="margin: 0 0 10px 0; font-weight: 600; color: #495057;">Format CSV attendu :</p>
+                        <code style="display: block; background: white; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 0.85em;">
+                            numero<br>
+                            150<br>
+                            152<br>
+                            155<br>
+                            ...
+                        </code>
+                        <p style="margin: 10px 0 0 0; font-size: 0.85em; color: #666;">
+                            Le fichier doit contenir une colonne "numero" avec les numéros des candidats.
+                        </p>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label class="btn btn-secondary" for="csvFileInput" style="cursor: pointer; display: inline-block; margin: 0;">
+                            📁 Choisir un fichier CSV
+                        </label>
+                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCsvImport(event)">
+                        <span id="csvFileName" style="margin-left: 10px; color: #666; font-size: 0.9em;">Aucun fichier sélectionné</span>
+                    </div>
+
+                    <div id="csvPreview" class="candidates-preview" style="display: none;">
+                        <!-- Aperçu des candidats importés -->
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; gap: 15px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="goBackToBareme()">← Retour au barème</button>
+                    <button class="btn btn-primary" onclick="generateCandidates()">Continuer →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- === PAGE DE GESTION DES CANDIDATS === -->
+        <div class="candidates-page" id="candidatesPage">
+            <div class="page-header">
+                <div class="stats-row">
+                    <div class="stat-card active">
+                        <div class="stat-number" id="activeCount">21</div>
+                        <div class="stat-label">Candidats actifs</div>
+                    </div>
+                    <div class="stat-card eliminated">
+                        <div class="stat-number" id="eliminatedCount">0</div>
+                        <div class="stat-label">Candidats éliminés</div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="stat-number" id="totalCount">21</div>
+                        <div class="stat-label">Total générés</div>
+                    </div>
+                </div>
+
+                <div class="validate-section">
+                    <div class="validate-title">✓ Valider votre paquet de copies</div>
+                    <div class="validate-subtitle">Cliquez sur les candidats à éliminer (ceux qui ne font pas partie de votre paquet)</div>
+                </div>
+
+                <div class="candidates-grid" id="candidatesGrid">
+                    <!-- Les candidats seront générés ici -->
+                </div>
+
+                <div class="info-box">
+                    <strong>Comment ça marche :</strong> Cliquez sur une carte pour éliminer/restaurer un candidat. 
+                    Les candidats éliminés sont barrés et en rouge. Seuls les candidats actifs (en bleu) seront traités lors de la correction.
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="backToSetup()">← Recommencer</button>
+                    <button class="btn btn-primary" onclick="startCorrection()" id="startCorrectionBtn">Commencer la correction (21 candidats) →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- === PAGE VUE D'ENSEMBLE DES CANDIDATS === -->
+        <div class="candidates-overview-page" id="candidatesOverviewPage">
+            <div class="overview-header">
+                <div class="overview-title">📋 Vue d'ensemble des candidats</div>
+                <div class="overview-actions">
+                    <div class="overview-actions-left">
+                        <div class="correction-mode-selector not-selected" id="correctionModeSelector">
+                            <span>🎯 Mode :</span>
+                            <select id="correctionMode" onchange="updateCorrectionMode()">
+                                <option value="">⚠️ Choisir un mode de correction</option>
+                                <option value="candidate">📋 Par candidat (copie complète)</option>
+                                <option value="exercise">🎯 Par exercice (tous les candidats)</option>
+                            </select>
+                        </div>
+                        <button class="export-btn" onclick="exportJSON()">
+                            <span>⬇</span>
+                            <span>Exporter JSON</span>
+                        </button>
+                        <button class="import-btn" onclick="importJSON()">
+                            <span>⬆</span>
+                            <span>Importer JSON</span>
+                        </button>
+                        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
+                    </div>
+                    <div class="motivation-checkbox">
+                        <input type="checkbox" id="motivationAnimation" checked onchange="toggleMotivationAnimation()">
+                        <label for="motivationAnimation">Animations de motivation (toutes les 5 copies)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mode-instruction show" id="modeInstruction">
+                <strong>⚠️ Veuillez d'abord choisir votre mode de correction</strong><br>
+                <span style="font-size: 12px; opacity: 0.8;">
+                    📋 <strong>Par candidat</strong> : correction complète candidat par candidat • 
+                    🎯 <strong>Par exercice</strong> : correction exercice par exercice pour tous les candidats
+                </span>
+            </div>
+
+            <div class="candidates-overview-grid" id="candidatesOverviewGrid">
+                <!-- Les cartes candidats seront générées ici -->
+            </div>
+
+            <div class="overview-navigation">
+                <button class="overview-nav-btn back" onclick="backToCandidatesFromOverview()">← Retour à la sélection</button>
+                <div id="correctionModeInfo" style="text-align: center; font-size: 13px; color: #6c757d;">
+                    <!-- Info sur le mode de correction -->
+                </div>
+                <button class="overview-nav-btn start" onclick="startCorrectionFromOverview()">Commencer la correction individuelle →</button>
+            </div>
+        </div>
+
+        <!-- === PAGE PRINCIPALE === -->
+        <div class="main-page" id="mainPage" style="display: none;">
+            <div class="main-header">
+                <div class="candidate-info">
+                    <button class="back-btn" onclick="backToCandidates()">← Liste</button>
+                    <div class="candidate-title" id="currentCandidateTitle">Correction du candidat n°150</div>
+                </div>
+
+                <div class="score-info">
+                    <div class="progress-info" id="progressInfo">Progression : 0%</div>
+                    <div class="total-score" id="totalScoreDisplay">Score: 0 / 20 points</div>
+                </div>
+            </div>
+
+            <div class="main-tabs" id="mainTabs">
+                <!-- Onglets générés dynamiquement depuis exercisesData -->
+            </div>
+
+
+
+            <!-- === ONGLETS EXERCICES === -->
+            <div id="exerciseTabsContainer">
+                <!-- Contenus des exercices générés dynamiquement -->
+            </div>
+
+            <div class="navigation-buttons">
+                <button class="nav-btn prev" onclick="navigatePrevious()" id="prevBtn">← Précédent</button>
+                <button class="nav-btn validate" onclick="validateCorrection()" id="validateBtn" style="background: #28a745; color: white;">✓ Valider la correction</button>
+                <button class="nav-btn next" onclick="navigateNext()" id="nextBtn">Suivant →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODAL DE MODIFICATION CRITÈRE === -->
+    <div class="modal-overlay" id="competenceModal">
+        <div class="modal-content">
+            <div class="modal-header edit">
+                Modifier un critère de type "<span id="modalCompetenceType"></span>"
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="modal-competence-badge" style="border-radius: 20px; padding: 8px 16px; display: inline-block; color: white; transition: all 0.3s ease;">
+                    <span id="modalCompetenceIcon" style="font-size: 18px; margin-right: 8px;">🧮</span>
+                    <span id="modalCompetenceName" style="font-weight: bold;">Calculer 1</span>
+                    <span style="margin-left: 8px; font-size: 12px; opacity: 0.9;">1 pt</span>
+                </div>
+            </div>
+            
+            <div class="modal-field">
+                <label for="modalDescription">Description (obligatoire)</label>
+                <textarea id="modalDescription" placeholder="Description qui apparaîtra en info-bulle du haut..."></textarea>
+            </div>
+            
+            <div class="modal-field">
+                <label for="modalPoints">Nombre de points</label>
+                <input type="number" id="modalPoints" min="0" max="20" step="0.5" value="1" oninput="updateModalPointsDisplay()">
+            </div>
+            
+            <div class="modal-field">
+                <label for="modalIncrement">Incrément par clic</label>
+                <input type="number" id="modalIncrement" min="0.5" max="5" step="0.5" value="1">
+            </div>
+            
+            <div class="modal-field">
+                <label for="modalTooltip">Info-bulle (facultatif)</label>
+                <input type="text" id="modalTooltip" placeholder="Information supplémentaire qui apparaîtra en bas...">
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeCompetenceModal()">Annuler</button>
+                <button class="modal-btn save" onclick="saveCompetenceModal()">Mettre à jour le critère</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODAL DE SÉLECTION COMPÉTENCES === -->
+    <div class="modal-overlay" id="competenceSelectionModal">
+        <div class="modal-content">
+            <div class="modal-header select">
+                Choisir un type de critère
+            </div>
+            
+            <div class="competences-selection-grid">
+                <div class="competence-selection-btn" onclick="selectCompetence('Calculer')">
+                    <div class="icon">🧮</div>
+                    <div class="name">Calculer</div>
+                </div>
+                
+                <div class="competence-selection-btn" onclick="selectCompetence('Modéliser')">
+                    <div class="icon">📊</div>
+                    <div class="name">Modéliser</div>
+                </div>
+                
+                <div class="competence-selection-btn" onclick="selectCompetence('Représenter')">
+                    <div class="icon">📈</div>
+                    <div class="name">Représenter</div>
+                </div>
+                
+                <div class="competence-selection-btn" onclick="selectCompetence('Raisonner')">
+                    <div class="icon">🤔</div>
+                    <div class="name">Raisonner</div>
+                </div>
+                
+                <div class="competence-selection-btn" onclick="selectCompetence('Communiquer')">
+                    <div class="icon">✓</div>
+                    <div class="name">Communiquer</div>
+                </div>
+                
+                <div class="competence-selection-btn" onclick="selectCompetence('Chercher')">
+                    <div class="icon">🔍</div>
+                    <div class="name">Chercher</div>
+                </div>
+                
+                <div class="competence-selection-btn create-new-btn" onclick="createNewCompetenceType()">
+                    <div class="icon">➕</div>
+                    <div class="name">Créer un nouveau type</div>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeCompetenceSelectionModal()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODALE DE COMMENTAIRE === -->
+    <div class="modal-overlay" id="commentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                💬 Commentaire pour le candidat n°<span id="commentCandidateNumber">150</span>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>Note : <span id="commentScore">17</span>/20</strong>
+                    </div>
+                    <div style="font-size: 0.9em; color: #6c757d;">
+                        <span id="commentProgress">20/20 questions traitées</span>
+                        <span id="commentNR" style="color: #dc3545; margin-left: 10px;"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-field">
+                <label for="candidateComment">Commentaire personnalisé</label>
+                <textarea id="candidateComment" placeholder="Ajouter un commentaire pour ce candidat..." rows="4"></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeCommentModal()">Annuler</button>
+                <button class="modal-btn save" onclick="saveComment()">Enregistrer le commentaire</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODALE DE SYNTHÈSE DES COMPÉTENCES === -->
+    <div class="modal-overlay" id="competencesSynthesisModal">
+        <div class="modal-content synthesis-modal">
+            <div class="modal-header synthesis-header">
+                📊 Synthèse des compétences - Candidat n°<span id="synthesisCandidateNumber">150</span>
+            </div>
+            
+            <div class="synthesis-score-section">
+                <div class="synthesis-main-score" id="synthesisMainScore">17/20</div>
+                <div class="synthesis-details">
+                    <span id="synthesisProgress">29/29 questions traitées</span>
+                    <span id="synthesisNR"></span>
+                </div>
+            </div>
+            
+            <div class="competences-synthesis-grid" id="competencesSynthesisGrid">
+                <!-- Les compétences seront générées ici -->
+            </div>
+            
+            <div class="modal-field">
+                <label for="synthesisComment">Commentaire global</label>
+                <textarea id="synthesisComment" placeholder="Saisissez un commentaire global sur la copie..." rows="4"></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeSynthesisModal()">Annuler</button>
+                <button class="modal-btn save" onclick="confirmSynthesisValidation()">✅ Valider la correction et revenir à la liste</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === PANNEAU DES PARAMÈTRES === -->
+    <div class="admin-panel" id="parametresPanel" style="display: none;">
+        <div class="admin-panel-container">
+            <div class="admin-panel-header">
+                <div class="admin-panel-title">
+                    <span class="admin-icon">🎛️</span>
+                    <span>Paramètres du barème</span>
+                </div>
+                <button class="admin-close-btn" onclick="toggleParametresPanel()">×</button>
+            </div>
+            
+            <div class="admin-section">
+                <div class="admin-section-title">🎯 Mode de définition du barème</div>
+                
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin-bottom: 15px; color: #1565c0; font-weight: 600;">
+                        Choisissez comment vous souhaitez attribuer les points aux compétences :
+                    </p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Mode A -->
+                        <label style="display: flex; align-items: start; gap: 12px; padding: 15px; background: white; border-radius: 8px; border: 2px solid #dee2e6; cursor: pointer; transition: all 0.2s;"
+                               onmouseover="this.style.borderColor='#4285f4'" 
+                               onmouseout="this.style.borderColor=appState.baremeConfig.mode==='a'?'#4285f4':'#dee2e6'">
+                            <input type="radio" 
+                                   name="baremeMode" 
+                                   value="a" 
+                                   onchange="changeBaremeMode('a')"
+                                   ${appState.baremeConfig.mode === 'a' ? 'checked' : ''}
+                                   style="margin-top: 3px;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                    📊 Mode A : Points par compétence
+                                </div>
+                                <div style="font-size: 0.9em; color: #666;">
+                                    Vous définissez le nombre de points pour chaque compétence individuellement
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <!-- Mode B (défaut) -->
+                        <label style="display: flex; align-items: start; gap: 12px; padding: 15px; background: white; border-radius: 8px; border: 2px solid #4285f4; cursor: pointer; transition: all 0.2s;"
+                               onmouseover="this.style.borderColor='#4285f4'" 
+                               onmouseout="this.style.borderColor=appState.baremeConfig.mode==='b'?'#4285f4':'#dee2e6'">
+                            <input type="radio" 
+                                   name="baremeMode" 
+                                   value="b" 
+                                   onchange="changeBaremeMode('b')"
+                                   checked
+                                   style="margin-top: 3px;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                    ⚡ Mode B : Répartition automatique (RECOMMANDÉ)
+                                </div>
+                                <div style="font-size: 0.9em; color: #666;">
+                                    Définissez le total de points, les points sont répartis équitablement entre les compétences
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <!-- Mode C -->
+                        <label style="display: flex; align-items: start; gap: 12px; padding: 15px; background: white; border-radius: 8px; border: 2px solid #dee2e6; cursor: pointer; transition: all 0.2s;"
+                               onmouseover="this.style.borderColor='#4285f4'" 
+                               onmouseout="this.style.borderColor=appState.baremeConfig.mode==='c'?'#4285f4':'#dee2e6'">
+                            <input type="radio" 
+                                   name="baremeMode" 
+                                   value="c" 
+                                   onchange="changeBaremeMode('c')"
+                                   ${appState.baremeConfig.mode === 'c' ? 'checked' : ''}
+                                   style="margin-top: 3px;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
+                                    🎯 Mode C : Total uniquement
+                                </div>
+                                <div style="font-size: 0.9em; color: #666;">
+                                    Seul le total de points compte, sans détail par compétence
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107; margin-top: 15px;">
+                    <strong>💡 Astuce :</strong> Le mode B (répartition automatique) est le plus rapide pour commencer. Vous pourrez toujours basculer vers le mode A si vous souhaitez plus de précision.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === PANNEAU D'ADMINISTRATION GLOBAL === -->
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+        <div class="admin-panel-container">
+            <div class="admin-panel-header">
+                <div class="admin-panel-title">
+                    <span class="admin-icon">⚙️</span>
+                    <span>Panneau d'administration</span>
+                </div>
+                <button class="admin-close-btn" onclick="toggleAdminPanel()">×</button>
+            </div>
+            
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="showAdminTab('bareme')">
+                    <span class="admin-tab-icon">📝</span>
+                    <span>Barème</span>
+                </button>
+                <button class="admin-tab" onclick="showAdminTab('test')">
+                    <span class="admin-tab-icon">🧪</span>
+                    <span>Outils de test</span>
+                </button>
+            </div>
+
+            <!-- Sous-onglet Barème -->
+            <div class="admin-tab-content active" id="adminBaremeTab">
+                <div class="admin-section">
+                    <div class="admin-section-title">📝 Configuration du barème et des compétences</div>
+                    
+                    <div style="background: #fff3cd; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <strong>⚠️ Attention :</strong> Les modifications du barème s'appliquent à tous les candidats. 
+                        Sauvegardez vos changements avant de commencer la correction.
+                    </div>
+                    
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2196f3;">
+                        <strong>📋 Workflow recommandé :</strong>
+                        <ol style="margin: 10px 0 0 20px; line-height: 1.6;">
+                            <li><strong>Modification :</strong> Ajustez les critères et points via cette interface</li>
+                            <li><strong>Sauvegarde temporaire :</strong> Cliquez "💾 Sauvegarder en mémoire"</li>
+                            <li><strong>Export de test :</strong> Cliquez "📤 Exporter le barème (JSON)" pour conserver vos tests</li>
+                            <li><strong>Test en correction :</strong> Utilisez le barème pour quelques copies</li>
+                            <li><strong>Ajustements :</strong> Modifiez et ré-exportez si nécessaire</li>
+                            <li><strong>Finalisation :</strong> Une fois sûr, demandez la génération d'un HTML définitif</li>
+                        </ol>
+                    </div>
+
+                    <!-- Navigation par exercice pour le barème -->
+                    <div class="admin-exercise-tabs">
+                        <button class="admin-exercise-tab active" onclick="showAdminExercise(1)">
+                            <span>🎲</span> Exercice 1
+                        </button>
+                        <button class="admin-exercise-tab" onclick="showAdminExercise(2)">
+                            <span>📐</span> Exercice 2
+                        </button>
+                        <button class="admin-exercise-tab" onclick="showAdminExercise(3)">
+                            <span>☐</span> Exercice 3
+                        </button>
+                        <button class="admin-exercise-tab" onclick="showAdminExercise(4)">
+                            <span>💻</span> Exercice 4
+                        </button>
+                        <button class="admin-exercise-tab" onclick="showAdminExercise(5)">
+                            <span>📈</span> Exercice 5
+                        </button>
+                    </div>
+
+                    <div class="admin-exercise-content" id="adminExerciseContent">
+                        <!-- Le contenu de l'exercice sélectionné sera généré ici -->
+                    </div>
+
+                    <div class="bareme-actions">
+                        <button class="save-bareme-btn" onclick="saveBareme()">
+                            💾 Sauvegarder en mémoire
+                        </button>
+                        
+                        <div class="bareme-import-export">
+                            <button class="export-bareme-btn" onclick="exportBareme()">
+                                📤 Exporter le barème (JSON)
+                            </button>
+                            <button class="import-bareme-btn" onclick="importBareme()">
+                                📥 Importer un barème (JSON)
+                            </button>
+                            <input type="file" id="importBaremeInput" accept=".json" style="display: none;" onchange="handleBaremeImport(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sous-onglet Outils de test -->
+            <div class="admin-tab-content" id="adminTestTab">
+                <div class="admin-section">
+                    <div class="admin-section-title">🧪 Outils de test développeur</div>
+                    
+                    <div style="background: #fff3cd; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <strong>ℹ️ Mode test :</strong> Ces outils permettent de tester les animations et fonctionnalités sans corriger toutes les copies.
+                    </div>
+
+                    <div class="test-buttons-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-bottom: 15px;">
+                        <button class="test-btn" onclick="generateTestCandidates()" style="background: #17a2b8; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">
+                            👥 Générer 5 candidats test
+                        </button>
+                        <button class="test-btn" onclick="quickFillAllCandidates()" style="background: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">
+                            ⚡ Pré-remplir tous les candidats
+                        </button>
+                        <button class="test-btn" onclick="testAnimation(5)" style="background: #ffc107; color: black; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">
+                            🎉 Test 5 copies (début)
+                        </button>
+                        <button class="test-btn" onclick="testAnimation(15)" style="background: #fd7e14; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">
+                            ⭐ Test 15 copies (maîtrise)
+                        </button>
+                        <button class="test-btn" onclick="testAnimation(25)" style="background: #6f42c1; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">
+                            💎 Test 25 copies (endurance)
+                        </button>
+                        <button class="test-btn" onclick="testAnimation(40)" style="background: #28a745; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">
+                            🔥 Test 40 copies (performance)
+                        </button>
+                        <button class="test-btn" onclick="testCompletionModal()" style="background: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;">
+                            🏁 Tester fin de correction
+                        </button>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <label for="testCounter" style="font-weight: bold;">Compteur copies validées :</label>
+                        <input type="number" id="testCounter" min="0" max="100" value="0" style="width: 80px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;">
+                        <button onclick="updateTestCounter()" style="background: #6c757d; color: white; padding: 4px 12px; border: none; border-radius: 4px; cursor: pointer;">
+                            Appliquer
+                        </button>
+                    </div>
+
+                    <button class="test-btn" onclick="resetAllData()" style="background: #dc3545; color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; width: 100%;">
+                        🗑️ Réinitialiser toutes les données
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODAL D'ANIMATION DE MOTIVATION === -->
+    <div class="modal-overlay" id="motivationModal" style="background: rgba(0,0,0,0.8); z-index: 15000;">
+        <div class="motivation-content">
+            <div class="confetti-container" id="confettiContainer"></div>
+            <div class="motivation-message">
+                <div class="motivation-icon" id="motivationIcon">🎉</div>
+                <div class="motivation-title" id="motivationTitle">Bravo !</div>
+                <div class="motivation-text" id="motivationText">5 copies corrigées ! Vous êtes sur la bonne voie !</div>
+                <div class="motivation-continue">Continuez ainsi ! 💪</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODAL DE FIN DE CORRECTION === -->
+    <div class="modal-overlay" id="completionModal">
+        <div class="modal-content completion-modal">
+            <div class="completion-header">
+                🏁 Correction terminée !
+            </div>
+            
+            <div class="completion-message">
+                <div class="completion-congrats">
+                    🎉 <strong>Félicitations !</strong> Toutes les copies ont été corrigées !
+                </div>
+                
+                <div class="completion-thanks">
+                    Merci d'avoir utilisé cet outil de correction DNB.
+                </div>
+                
+                <div class="completion-request">
+                    <p><strong>Pour encourager le développement et améliorer l'outil grâce aux statistiques de correction :</strong></p>
+                    <p>Merci d'exporter le fichier JSON et de l'envoyer à : <strong>correction-dnb@ac-nantes.fr</strong></p>
+                    <p style="font-size: 0.9em; color: #6c757d;">Votre contribution aide à améliorer l'outil pour tous les correcteurs !</p>
+                </div>
+                
+                <div class="completion-actions">
+                    <button class="btn-export-final" onclick="exportFinalData()">
+                        📤 Exporter mes données de correction
+                    </button>
+                </div>
+            </div>
+            
+            <div class="completion-survey" id="completionSurvey" style="display: none;">
+                <div class="survey-title">📋 Évaluation rapide (optionnel)</div>
+                <div class="survey-questions" id="surveyQuestions">
+                    <!-- Questions générées dynamiquement -->
+                </div>
+                <div class="survey-actions">
+                    <button class="btn-skip-survey" onclick="skipSurvey()">Passer</button>
+                    <button class="btn-submit-survey" onclick="submitSurvey()">Envoyer l'évaluation</button>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeCompletionModal()">Fermer</button>
+                <button class="modal-btn save" onclick="showSurvey()" id="btnShowSurvey">📋 Évaluer l'outil (optionnel)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MODALE DE VALIDATION AVEC SYNTHÈSE INTÉGRÉE === -->
+    <div class="modal-overlay" id="validationModal">
+        <div class="modal-content validation-synthesis-modal">
+            <div class="validation-header">
+                <span class="validation-title">Candidat n°<span id="validationCandidateNumber">150</span></span>
+                <button class="close-btn" onclick="closeValidationModal()">×</button>
+            </div>
+            
+            <div class="exercises-badges-container" id="exercisesValidationGrid">
+                <!-- Les badges d'exercices seront générés ici -->
+            </div>
+            
+            <div class="main-score-container">
+                <div class="main-score-badge" id="validationMainScore">17/20</div>
+                <div class="score-nr" id="validationNR"></div>
+            </div>
+            
+            <div class="competences-table-container">
+                <table class="competences-table">
+                    <thead>
+                        <tr>
+                            <th>Compétence</th>
+                            <th>% & Items</th>
+                            <th>Niveau</th>
+                            <th>Progression</th>
+                        </tr>
+                    </thead>
+                    <tbody id="competencesValidationTable">
+                        <!-- Les compétences seront générées ici -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="comment-section">
+                <div class="comment-header">
+                    <label for="validationComment">Commentaire global</label>
+                    <button type="button" class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecognition()">
+                        🎤 Dictée vocale
+                    </button>
+                </div>
+                <textarea id="validationComment" placeholder="Saisissez un commentaire global sur la copie..." rows="4"></textarea>
+                <div class="voice-status" id="voiceStatus" style="display: none;">
+                    <span class="voice-indicator">🔴 Écoute en cours...</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeValidationModal()">Annuler</button>
+                <button class="btn-validate-next" onclick="confirmValidationAndNext()" id="btnValidateNext">➡️ Valider et candidat suivant</button>
+                <button class="btn-validate" onclick="confirmValidationAndReturn()">✅ Valider et revenir à la liste</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'édition de compétence pour le barème -->
+    <div id="baremeCompetenceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s ease;">
+            <div id="baremeCompModalHeader" style="background: #28a745; color: white; padding: 20px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="baremeCompModalIcon" style="font-size: 28px;">✏️</span>
+                    <div>
+                        <h3 id="baremeCompModalTitle" style="margin: 0; font-size: 1.3em;">Éditer la compétence</h3>
+                        <p id="baremeCompModalSubtitle" style="margin: 4px 0 0 0; opacity: 0.9; font-size: 0.9em;">Calculer</p>
+                    </div>
+                </div>
+                <button onclick="closeBaremeCompetenceModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">×</button>
+            </div>
+
+            <div style="padding: 24px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #2c3e50;">
+                        📝 Description <span style="color: #dc3545;">*</span>
+                    </label>
+                    <p style="font-size: 0.85em; color: #666; margin: 0 0 8px 0;">
+                        Décrivez brièvement ce qui sera évalué (apparaît sur le bouton de correction)
+                    </p>
+                    <textarea id="baremeCompDescription"
+                              placeholder="Ex: Effectuer le calcul de probabilité"
+                              style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-family: inherit; min-height: 70px; resize: vertical;"
+                              required></textarea>
+                    <div id="descriptionError" style="color: #dc3545; font-size: 0.85em; margin-top: 4px; display: none;">
+                        ⚠️ La description est obligatoire
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #2c3e50;">
+                        💡 Tooltip (optionnel)
+                    </label>
+                    <p style="font-size: 0.85em; color: #666; margin: 0 0 8px 0;">
+                        Informations supplémentaires (s'affiche au survol du bouton)
+                    </p>
+                    <textarea id="baremeCompTooltip"
+                              placeholder="Ex: Utiliser la formule P = n/N"
+                              style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-family: inherit; min-height: 60px; resize: vertical;"></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #2c3e50;">
+                            🎯 Points max
+                        </label>
+                        <input type="number"
+                               id="baremeCompPoints"
+                               value="2"
+                               min="0.5"
+                               max="20"
+                               step="0.5"
+                               style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1em;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #2c3e50;">
+                            ➕ Incrément
+                        </label>
+                        <input type="number"
+                               id="baremeCompIncrement"
+                               value="1"
+                               min="0.5"
+                               max="5"
+                               step="0.5"
+                               style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1em;">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="saveBaremeCompetenceModal()"
+                            style="flex: 1; padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1em; transition: all 0.2s;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(40, 167, 69, 0.4)';"
+                            onmouseout="this.style.transform=''; this.style.boxShadow='';">
+                        ✅ Sauvegarder
+                    </button>
+                    <button onclick="closeBaremeCompetenceModal()"
+                            style="padding: 12px 24px; background: #6c757d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.background='#5a6268';"
+                            onmouseout="this.style.background='#6c757d';">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div><!-- Fin contentWrapper -->
+
+    <!-- Modal de configuration PDF -->
+    <div id="pdfConfigModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h3 style="margin: 0; color: white; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 28px;">📄</span>
+                    <div>
+                        <div style="font-size: 1.3em;">Génération PDF du sujet</div>
+                        <div style="font-size: 0.9em; opacity: 0.9; margin-top: 4px;">Configuration de la page de garde</div>
+                    </div>
+                </h3>
+                <button onclick="closePdfConfigModal()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; cursor: pointer; border-radius: 50%; width: 36px; height: 36px;">×</button>
+            </div>
+
+            <div class="modal-body" style="padding: 24px;">
+                <form id="pdfConfigForm" onsubmit="event.preventDefault(); generateSubjectPdf();">
+                    <!-- Informations établissement -->
+                    <div style="margin-bottom: 24px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
+                        <h4 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 1.1em;">🏫 Établissement</h4>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #495057;">
+                                Nom de l'établissement <span style="color: #dc3545;">*</span>
+                            </label>
+                            <input type="text" id="pdfEtablissement" placeholder="Ex: Collège Gaston Chaissac"
+                                   style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px;" required>
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #495057;">
+                                Ville <span style="color: #dc3545;">*</span>
+                            </label>
+                            <input type="text" id="pdfVille" placeholder="Ex: POUZAUGES"
+                                   style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px;" required>
+                        </div>
+                    </div>
+
+                    <!-- Informations épreuve -->
+                    <div style="margin-bottom: 24px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
+                        <h4 style="margin: 0 0 16px 0; color: #2c3e50; font-size: 1.1em;">📅 Épreuve</h4>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #495057;">
+                                Session <span style="color: #dc3545;">*</span>
+                            </label>
+                            <input type="text" id="pdfSession" placeholder="Ex: SESSION DU MARDI 29 AVRIL 2025"
+                                   style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px;" required>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #495057;">
+                                    Durée <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="text" id="pdfDuree" placeholder="Ex: 2H" value="2H"
+                                       style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px;" required>
+                            </div>
+                            <div>
+                                <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #495057;">
+                                    Total points <span style="color: #dc3545;">*</span>
+                                </label>
+                                <input type="number" id="pdfPoints" placeholder="100" value="100"
+                                       style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px;" required>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #495057;">
+                                Série / Type d'épreuve <span style="color: #dc3545;">*</span>
+                            </label>
+                            <input type="text" id="pdfSerie" placeholder="Ex: SÉRIE DNB BLANC 2"
+                                   style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px;" required>
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 6px; color: #495057;">
+                                Badge (optionnel)
+                            </label>
+                            <input type="text" id="pdfBadge" placeholder="Ex: BREVET BLANC" value="BREVET BLANC"
+                                   style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px;">
+                            <small style="color: #6c757d; font-size: 0.85em;">Texte affiché dans l'encadré central</small>
+                        </div>
+                    </div>
+
+                    <!-- Mode de génération -->
+                    <div style="margin-bottom: 20px; padding: 16px; background: #fff3cd; border-radius: 8px; border: 2px solid #ffc107;">
+                        <h4 style="margin: 0 0 12px 0; color: #856404; font-size: 1.1em;">⚙️ Mode de génération</h4>
+                        <div style="display: flex; gap: 12px;">
+                            <label style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #dee2e6; border-radius: 6px; background: white; transition: all 0.2s;">
+                                <input type="radio" name="pdfMode" value="complete" checked style="margin-right: 8px;">
+                                <strong>📄 Exercices complets</strong>
+                                <div style="font-size: 0.85em; color: #6c757d; margin-top: 4px;">1 PNG par exercice (méthode actuelle)</div>
+                            </label>
+                            <label style="flex: 1; cursor: pointer; padding: 12px; border: 2px solid #dee2e6; border-radius: 6px; background: white; transition: all 0.2s;">
+                                <input type="radio" name="pdfMode" value="questions" style="margin-right: 8px;">
+                                <strong>🎯 Questions séparées</strong>
+                                <div style="font-size: 0.85em; color: #6c757d; margin-top: 4px;">1 PNG par question (nouveau)</div>
+                            </label>
+                        </div>
+                        <div id="modeIndicator" style="margin-top: 12px; padding: 8px; background: #e7f3ff; border-left: 4px solid #0066cc; border-radius: 4px; font-size: 0.9em;">
+                            ℹ️ <strong>Mode actuel :</strong> Exercices complets
+                        </div>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 2px solid #e9ecef; flex-wrap: wrap;">
+                        <button type="button" onclick="closePdfConfigModal()" class="btn btn-secondary">
+                            Annuler
+                        </button>
+                        <button type="button" onclick="generateSubjectPdf(false)" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                            📄 Générer PDF Sujet
+                        </button>
+                        <button type="button" onclick="generateSubjectPdf(true)" class="btn btn-success" style="background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); border: none;">
+                            ✅ Générer PDF Correction
+                        </button>
+                    </div>
+
+                    <script>
+                    // Mettre à jour l'indicateur de mode
+                    document.querySelectorAll('input[name="pdfMode"]').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            const indicator = document.getElementById('modeIndicator');
+                            if (this.value === 'complete') {
+                                indicator.innerHTML = 'ℹ️ <strong>Mode actuel :</strong> Exercices complets (1 PNG par exercice entier)';
+                                indicator.style.background = '#e7f3ff';
+                                indicator.style.borderColor = '#0066cc';
+                            } else {
+                                indicator.innerHTML = '🎯 <strong>Mode actuel :</strong> Questions séparées (1 PNG par question - groupement intelligent)';
+                                indicator.style.background = '#d4edda';
+                                indicator.style.borderColor = '#28a745';
+                            }
+                        });
+                    });
+                    </script>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/state/appState.js?v=20251105017"></script>
+    <script src="js/workflow.js?v=20251105017"></script>
+    <!-- Mode test JSON (optionnel) -->
+    <script src="js/modules/importJSON.js?v=20251105017"></script>
+    <!-- Module de génération PDF -->
+    <script src="js/modules/pdfGenerator.js?v=20251110003"></script>
+    <script src="js/app.js?v=20251105017"></script>
+</body>
+</html>

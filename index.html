@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNB Blanc 25-26 - Correcteur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .cards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .card-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .card-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .card-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DNB Blanc 25-26</h1>
+            <p>Correcteur de Brevet Blanc</p>
+        </div>
+
+        <div class="cards">
+            <!-- Concepteur -->
+            <div class="card" onclick="window.location.href='app.html'">
+                <div class="card-icon">🎨</div>
+                <div class="card-title">Concevoir un sujet</div>
+                <div class="card-description">
+                    Sélectionnez les exercices, configurez le barème et exportez un pack sujet pour les correcteurs
+                </div>
+                <button class="card-btn">Commencer la conception</button>
+            </div>
+
+            <!-- Correcteur -->
+            <div class="card" onclick="loadSubjectPack()">
+                <div class="card-icon">✏️</div>
+                <div class="card-title">Charger un pack sujet</div>
+                <div class="card-description">
+                    Importez un pack sujet pré-configuré et commencez directement la correction
+                </div>
+                <button class="card-btn">Importer un pack</button>
+                <input type="file" id="packFileInput" accept=".json" style="display: none;" onchange="handlePackImport(event)">
+            </div>
+        </div>
+
+        <div class="footer">
+            Créé avec ❤️ par Badri BELHAJ
+        </div>
+    </div>
+
+    <script>
+        function loadSubjectPack() {
+            document.getElementById('packFileInput').click();
+        }
+
+        function handlePackImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const packData = JSON.parse(e.target.result);
+                    // Stocker le pack dans localStorage
+                    localStorage.setItem('dnb_subject_pack', JSON.stringify(packData));
+                    localStorage.setItem('dnb_correction_mode', 'true');
+                    // Rediriger vers l'app en mode correction
+                    window.location.href = 'app.html?mode=correction';
+                } catch (err) {
+                    alert('Erreur lors de la lecture du fichier : ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Vérifier si un lien avec pack encodé
+        const urlParams = new URLSearchParams(window.location.search);
+        const packParam = urlParams.get('pack');
+        if (packParam) {
+            try {
+                const packData = JSON.parse(atob(packParam));
+                localStorage.setItem('dnb_subject_pack', JSON.stringify(packData));
+                localStorage.setItem('dnb_correction_mode', 'true');
+                window.location.href = 'app.html?mode=correction';
+            } catch (err) {
+                console.error('Erreur décodage pack URL:', err);
+            }
+        }
+    </script>
+</body>
+</html>
