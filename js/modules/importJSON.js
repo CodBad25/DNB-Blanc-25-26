@@ -10,7 +10,7 @@ const JSON_SOURCE = {
     // Chemin vers les JSON générés par dnb-latex-processor (lien symbolique)
     basePath: 'dnb-json/',
     catalogFile: 'catalog.json',
-    enabled: true  // ⬅️ TOGGLE ICI : true pour tester, false pour désactiver
+    enabled: false  // ⬅️ DÉSACTIVÉ pour la production
 };
 
 /**
