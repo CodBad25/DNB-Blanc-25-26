@@ -1384,8 +1384,14 @@ function createFinalExercisesData() {
         console.log('  - questions:', parsedExercise?.questions?.length || 0);
 
         if (parsedExercise && dnbData) {
+            // Obtenir titre court depuis les tags
+            let shortTitle = exerciseId;
+            if (dnbData.tags && dnbData.tags.length > 0) {
+                shortTitle = dnbData.tags[0];
+            }
+
             exercisesData[exerciseNum] = {
-                title: `Exercice ${exerciseNum} - ${exerciseId}`,
+                title: `Exercice ${exerciseNum} - ${shortTitle}`,
                 totalPoints: 3.5, // Sera remplacé par la config du barème
                 questions: parsedExercise.questions.map((qItem, qIndex) => {
                     // Gérer les objets (nouvelle structure) et strings (rétrocompatibilité)
@@ -1766,21 +1772,25 @@ function adjustCompetencePoints(exerciseNum, questionIndex, compName, delta) {
 function renderBaremeExerciseTabs() {
     const tabsContainer = document.getElementById('baremeExerciseTabs');
     if (!tabsContainer) return;
-    
+
     tabsContainer.innerHTML = '';
-    const defaultIcons = ['📝', '📐', '🔢', '💻', '📊', '🎯', '📈', '🧮'];
-    
+
     // Récupérer tous les exercices (1 à 5)
     const allExerciseNums = Object.keys(appState.baremeConfig.exercises).sort((a, b) => parseInt(a) - parseInt(b));
-    
+
     allExerciseNums.forEach((exerciseNum, index) => {
         const baremeData = appState.baremeConfig.exercises[exerciseNum];
-        const icon = defaultIcons[index] || '📝';
         const isActive = index === currentBaremeExerciseIndex;
-        
-        // Titre différent pour Ex1 (Automatismes) - seulement si c'est vraiment un automatisme
+
+        // Obtenir titre et icône depuis les tags de l'exercice
+        let displayInfo = { title: `Exercice ${exerciseNum}`, icon: '📝' };
         const isAutomatismeEx = exerciseNum === '1' && exercisesData[1]?.isAutomatismes;
-        const exTitle = isAutomatismeEx ? 'Ex1 (Automatismes)' : `Exercice ${exerciseNum}`;
+
+        if (isAutomatismeEx) {
+            displayInfo = { title: 'Automatismes', icon: '⚡' };
+        } else if (baremeData.dnbId && typeof getExerciseDisplayInfoFromDnbId === 'function') {
+            displayInfo = getExerciseDisplayInfoFromDnbId(baremeData.dnbId);
+        }
 
         // Vérifier la cohérence des points
         const consistency = checkExercisePointsConsistency(exerciseNum);
@@ -1792,8 +1802,8 @@ function renderBaremeExerciseTabs() {
         tabBtn.className = `bareme-exercise-tab ${isActive ? 'active' : ''}`;
         tabBtn.onclick = () => showBaremeExercise(index);
         tabBtn.innerHTML = `
-            <span>${icon}</span>
-            <span>${exTitle}</span>
+            <span>${displayInfo.icon}</span>
+            <span>${displayInfo.title}</span>
             <span style="margin-left: 8px; font-size: 0.85em; opacity: 0.8;">(${baremeData.totalPoints} pts)</span>
             ${warningBadge}
         `;
@@ -2046,21 +2056,24 @@ function showBaremeExerciseDNB(exerciseNum) {
 
     // Mettre à jour les onglets
     renderBaremeExerciseTabs();
-    
+
     // Générer le contenu de l'exercice avec questions séparées
     const contentContainer = document.getElementById('baremeExerciseContent');
     if (!contentContainer) return;
-    
+
     const year = appState.dnbData[exerciseId].annee;
     const localPngUrl = `dnb/${year}/tex/png/${exerciseId}.png`;
     const remotePngUrl = `https://coopmaths.fr/alea/static/dnb/${year}/tex/png/${exerciseId}.png`;
-    
+
+    // Obtenir le titre court depuis les tags
+    const displayInfo = getExerciseDisplayInfoFromDnbId(exerciseId);
+
     let html = `
         <div style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #e9ecef;">
             <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px; margin-bottom: 15px;">
                 <div style="flex: 1;">
                     <h3 style="color: #2c3e50; margin-bottom: 10px;">
-                        📝 Exercice ${exerciseNum} - ${exerciseId}
+                        ${displayInfo.icon} Exercice ${exerciseNum} - ${displayInfo.title}
                     </h3>
                     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                         <span class="exercise-badge">📅 ${appState.dnbData[exerciseId].annee}</span>
@@ -4040,10 +4053,11 @@ function generateExercisesDataFromSelection() {
             title: exerciseTitle,
             totalPoints: totalPoints,
             questions: questions,
-            selectedCompetences: usedCompetences // Pré-sélectionner les compétences utilisées
+            selectedCompetences: usedCompetences, // Pré-sélectionner les compétences utilisées
+            dnbId: exerciseId // Pour permettre getExerciseDisplayInfo()
         };
     });
-    
+
     return newData;
 }
 
@@ -4085,6 +4099,22 @@ function getExerciseDisplayInfo(exercise) {
             }
         }
         // Si pas de mapping, utiliser le premier tag comme titre
+        return { title: dnbData.tags[0], icon: '📝' };
+    }
+
+    return { title: 'Exercice', icon: '📝' };
+}
+
+// Variante qui prend directement un dnbId
+function getExerciseDisplayInfoFromDnbId(dnbId) {
+    const dnbData = appState.dnbData[dnbId];
+
+    if (dnbData && dnbData.tags && dnbData.tags.length > 0) {
+        for (const tag of dnbData.tags) {
+            if (TAG_TO_DISPLAY[tag]) {
+                return TAG_TO_DISPLAY[tag];
+            }
+        }
         return { title: dnbData.tags[0], icon: '📝' };
     }
 
