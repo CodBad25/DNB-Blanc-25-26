@@ -7498,11 +7498,88 @@ saveValidationData = function() {
 async function loadBB1Exercises() {
     console.log('📋 Chargement du DNB Blanc n°1...');
 
-    const bb1Config = JSON.parse(localStorage.getItem('dnb_bb1_config'));
-    if (!bb1Config) {
-        console.error('❌ Configuration BB1 non trouvée');
-        return;
-    }
+    // Configuration BB1 intégrée directement (ne dépend plus du localStorage)
+    const bb1Config = {
+        skipAutomatismes: true,
+        selectedExercises: [
+            "dnb_2017_12_wallisfutuna_7",
+            "dnb_2016_04_pondichery_3",
+            "dnb_2019_06_asie_2",
+            "dnb_2017_11_ameriquesud_6",
+            "dnb_2019_11_ameriquesud_5"
+        ],
+        baremeConfig: {
+            mode: "b",
+            totalMax: 20,
+            exercises: {
+                "1": {
+                    totalPoints: 6,
+                    dnbId: "dnb_2017_12_wallisfutuna_7",
+                    questionPoints: { q0: 2.5, q1: 2.5, q2: 1 },
+                    questionCompetences: {
+                        q0: ["Modéliser", "Calculer"],
+                        q1: ["Modéliser", "Calculer"],
+                        q2: ["Calculer"]
+                    },
+                    questionCompetencePoints: {
+                        q0: { "Modéliser": 1, "Calculer": 1.5 },
+                        q1: { "Modéliser": 1, "Calculer": 1.5 },
+                        q2: { "Calculer": 1 }
+                    }
+                },
+                "2": {
+                    totalPoints: 4,
+                    dnbId: "dnb_2016_04_pondichery_3",
+                    questionPoints: { q0: 1, q1: 0.5, q2: 0.5, q3: 1, q4: 1 },
+                    questionCompetences: {
+                        q0: ["Chercher"], q1: ["Chercher"], q2: ["Chercher"],
+                        q3: ["Raisonner"], q4: ["Raisonner"]
+                    },
+                    questionCompetencePoints: {
+                        q0: { "Chercher": 1 }, q1: { "Chercher": 0.5 }, q2: { "Chercher": 0.5 },
+                        q3: { "Raisonner": 1 }, q4: { "Raisonner": 1 }
+                    }
+                },
+                "3": {
+                    totalPoints: 3,
+                    dnbId: "dnb_2019_06_asie_2",
+                    questionPoints: { q0: 1.5, q1: 1.5 },
+                    questionCompetences: {
+                        q0: ["Calculer", "Chercher"],
+                        q1: ["Calculer", "Chercher"]
+                    },
+                    questionCompetencePoints: {
+                        q0: { "Calculer": 1, "Chercher": 0.5 },
+                        q1: { "Calculer": 1, "Chercher": 0.5 }
+                    }
+                },
+                "4": {
+                    totalPoints: 4,
+                    dnbId: "dnb_2017_11_ameriquesud_6",
+                    questionPoints: { q0: 1, q1: 1, q2: 1, q3: 1 },
+                    questionCompetences: {
+                        q0: ["Modéliser"], q1: ["Modéliser"], q2: ["Modéliser"], q3: ["Modéliser"]
+                    },
+                    questionCompetencePoints: {
+                        q0: { "Modéliser": 1 }, q1: { "Modéliser": 1 }, q2: { "Modéliser": 1 }, q3: { "Modéliser": 1 }
+                    }
+                },
+                "5": {
+                    totalPoints: 3,
+                    dnbId: "dnb_2019_11_ameriquesud_5",
+                    questionPoints: { q0: 1, q1: 2 },
+                    questionCompetences: {
+                        q0: ["Chercher"],
+                        q1: ["Communiquer"]
+                    },
+                    questionCompetencePoints: {
+                        q0: { "Chercher": 1 },
+                        q1: { "Communiquer": 2 }
+                    }
+                }
+            }
+        }
+    };
 
     // Fermer la modale de configuration si ouverte
     const configModal = document.getElementById('configurationModal');
@@ -7536,9 +7613,6 @@ async function loadBB1Exercises() {
         createWorkflowStepper();
 
         console.log('✅ BB1 chargé avec succès');
-
-        // Nettoyer
-        localStorage.removeItem('dnb_bb1_config');
 
     } catch (error) {
         console.error('❌ Erreur chargement BB1:', error);
