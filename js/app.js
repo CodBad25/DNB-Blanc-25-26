@@ -7531,6 +7531,7 @@ async function loadBB1Exercises() {
         workflowState.currentStep = 3;
 
         // Afficher la page du barème
+        showPage('baremeDesignPage');
         renderBaremeDesignPage();
         createWorkflowStepper();
 
