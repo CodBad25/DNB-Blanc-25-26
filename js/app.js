@@ -3127,6 +3127,12 @@ async function loadAndParseSelectedExercises() {
 function latexToHtml(latex, exerciceId) {
     let html = latex;
 
+    // ⚠️ Convertir \np AVANT de protéger les formules mathématiques
+    // car \np apparaît souvent dans les formules et KaTeX ne le reconnaît pas
+    html = html.replace(/\\np\[([^\]]*)\]\{([^}]*)\}/g, '$2\\text{ $1}');
+    html = html.replace(/\\np\{([^}]*)\}/g, '$1');
+    html = html.replace(/\\np(\d+)/g, '$1');
+
     // ⚠️ IMPORTANT : Préserver les formules mathématiques AVANT toute autre conversion
     // MathALÉA préserve les formules pour que KaTeX les traite ensuite
 
