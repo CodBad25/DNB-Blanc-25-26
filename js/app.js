@@ -5445,6 +5445,15 @@ function renderExerciseContent(exerciseNumber) {
     const dnbId = exercise.dnbId;
     const parsedExercise = dnbId && appState.parsedExercises ? appState.parsedExercises[dnbId] : null;
 
+    // 🐛 DEBUG
+    console.log(`🔍 renderExerciseContent(${exerciseNumber}):`);
+    console.log('  - dnbId:', dnbId);
+    console.log('  - appState.parsedExercises keys:', Object.keys(appState.parsedExercises || {}));
+    console.log('  - parsedExercise:', parsedExercise);
+    if (parsedExercise) {
+        console.log('  - corrections:', parsedExercise.corrections);
+    }
+
     // 🔧 Calculer les compétences de l'exercice
     const exerciseCompetences = {};
     exercise.questions.forEach(question => {
@@ -5621,6 +5630,12 @@ function renderExerciseContent(exerciseNumber) {
         const enonceDiv = document.getElementById(`enonce_corr_${exerciseNumber}_${qIndex}`);
         const correctionDiv = document.getElementById(`correction_corr_${exerciseNumber}_${qIndex}`);
 
+        console.log(`  🔧 Question ${qIndex}:`, {
+            enonceDiv: !!enonceDiv,
+            correctionDiv: !!correctionDiv,
+            'question.answer': question.answer?.substring(0, 50)
+        });
+
         // Énoncé depuis parsedExercise si disponible
         if (enonceDiv && parsedExercise && parsedExercise.questions && parsedExercise.questions[qIndex]) {
             const qItem = parsedExercise.questions[qIndex];
@@ -5635,8 +5650,12 @@ function renderExerciseContent(exerciseNumber) {
             if (parsedExercise && parsedExercise.corrections && parsedExercise.corrections[qIndex]) {
                 const corrItem = parsedExercise.corrections[qIndex];
                 correction = typeof corrItem === 'object' ? corrItem.content : corrItem;
+                console.log(`    ✅ Correction depuis parsedExercise:`, correction?.substring(0, 50));
             } else if (question.answer && question.answer !== 'Correction à venir') {
                 correction = question.answer;
+                console.log(`    ⚠️ Fallback vers question.answer:`, correction?.substring(0, 50));
+            } else {
+                console.log(`    ❌ Pas de correction trouvée`);
             }
 
             correctionDiv.innerHTML = correction;
