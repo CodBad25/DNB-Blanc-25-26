@@ -19,7 +19,7 @@
     <script src="js/modules/generateursAutomatismes.js?v=20251105004"></script>
     <!-- MathALÉA Integration via RPC (comme Capytale) -->
     <script type="module" src="js/rpc-wrapper.js"></script>
-    <link rel="stylesheet" href="css/main.css?v=20251106002">
+    <link rel="stylesheet" href="css/main.css?v=20260114001">
     <style>
         body {
             margin: 0;
@@ -65,6 +65,11 @@
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
+        }
+        /* Padding réduit quand baremeDesignPage est actif */
+        #baremeDesignPage.active ~ * .container,
+        .container:has(#baremeDesignPage.active) {
+            padding: 5px !important;
         }
     </style>
 </head>
@@ -401,7 +406,7 @@
             </div>
 
             <!-- Conteneur du contenu de l'exercice sélectionné -->
-            <div id="baremeExerciseContent" style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-height: 60vh; overflow-y: auto;">
+            <div id="baremeExerciseContent" style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <!-- Le contenu de l'exercice sélectionné sera généré ici -->
             </div>
         </div>
@@ -1485,9 +1490,9 @@
     <!-- Module de génération PDF -->
     <script src="js/modules/pdfGenerator.js?v=20260114007"></script>
     <!-- Module de gestion des packs sujet -->
-    <script src="js/modules/packManager.js?v=20260114007"></script>
+    <script src="js/modules/packManager.js?v=20260114014"></script>
     <!-- Barèmes prédéfinis -->
     <script src="js/baremes/bb1_2025.js?v=20260114001"></script>
-    <script src="js/app.js?v=20260114013"></script>
+    <script src="js/app.js?v=20260114016"></script>
 </body>
 </html>

@@ -51,6 +51,12 @@ function generatePackSummary() {
 function createPackData() {
     const packName = document.getElementById('packSubjectName')?.value || 'DNB Blanc';
 
+    // ✅ S'assurer que les compétences sont appliquées à exercisesData
+    if (typeof applyBaremeCompetencesToExercisesData === 'function') {
+        applyBaremeCompetencesToExercisesData();
+        console.log('✅ Compétences appliquées à exercisesData pour l\'export');
+    }
+
     return {
         version: '1.0',
         type: 'dnb-subject-pack',

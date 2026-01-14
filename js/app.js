@@ -3057,15 +3057,28 @@ function goBackToSelection() {
 }
 
 function continueToCandidates() {
+    console.log('🎯 continueToCandidates() appelé');
+    console.log('📊 baremeConfig.exercises:', appState.baremeConfig.exercises);
+
     // Valider le barème
     let hasError = false;
     Object.entries(appState.baremeConfig.exercises).forEach(([exerciseId, baremeData]) => {
+        // Initialiser selectedCompetences si non défini
+        if (!baremeData.selectedCompetences) {
+            baremeData.selectedCompetences = [];
+        }
+
         // Vérifier si des compétences sont assignées au niveau exercice OU au niveau des questions
         const hasExerciseCompetences = baremeData.selectedCompetences.length > 0;
         const hasQuestionCompetences = baremeData.questionCompetences &&
-            Object.values(baremeData.questionCompetences).some(comps => comps && comps.length > 0);
+            Object.keys(baremeData.questionCompetences).length > 0 &&
+            Object.values(baremeData.questionCompetences).some(comps => Array.isArray(comps) && comps.length > 0);
+
+        console.log(`  Ex${exerciseId}: hasExerciseCompetences=${hasExerciseCompetences}, hasQuestionCompetences=${hasQuestionCompetences}`);
+        console.log(`    questionCompetences:`, baremeData.questionCompetences);
 
         if (!hasExerciseCompetences && !hasQuestionCompetences) {
+            console.warn(`⚠️ Exercice ${exerciseId} sans compétences`);
             alert(`⚠️ Veuillez sélectionner au moins une compétence pour l'exercice ${exerciseId}`);
             hasError = true;
         }
@@ -4221,10 +4234,19 @@ function startCorrection() {
         return;
     }
 
-    // 🔧 Générer exercisesData depuis le barème et les exercices parsés
-    console.log('🎯 Génération de exercisesData avant la correction...');
-    exercisesData = generateExercisesDataFromSelection();
-    console.log('✅ exercisesData généré:', exercisesData);
+    // 🔧 Vérifier si exercisesData est déjà chargé (mode correction depuis pack)
+    const hasValidExercisesData = exercisesData && Object.keys(exercisesData).length > 0;
+
+    if (hasValidExercisesData) {
+        // Mode correction : exercisesData déjà chargé depuis le pack
+        console.log('📦 Mode correction : utilisation de exercisesData du pack');
+        console.log('✅ exercisesData existant:', exercisesData);
+    } else {
+        // Mode conception : générer exercisesData depuis le barème et les exercices parsés
+        console.log('🎯 Génération de exercisesData avant la correction...');
+        exercisesData = generateExercisesDataFromSelection();
+        console.log('✅ exercisesData généré:', exercisesData);
+    }
 
     // 🎯 Sélectionner automatiquement le mode "Par candidat" par défaut
     appState.correctionMode = 'candidate';
