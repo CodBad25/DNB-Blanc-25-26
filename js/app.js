@@ -3190,6 +3190,8 @@ function latexToHtml(latex, exerciceId) {
     html = html.replace(/\\fg\{\}/g, '»');
     html = html.replace(/\\og\s+/g, '« ');
     html = html.replace(/\\fg\s+/g, ' »');
+    html = html.replace(/\\og(?![a-zA-Z])/g, '«');
+    html = html.replace(/\\fg(?![a-zA-Z])/g, '»');
     html = html.replace(/\\medskip/gi, '<br>');
     html = html.replace(/\\bigskip/gi, '<br><br>');
     html = html.replace(/\\smallskip/gi, '<br>');
@@ -3197,6 +3199,8 @@ function latexToHtml(latex, exerciceId) {
     // Conversion \np avec ou sans paramètre optionnel : \np[cm]{29} → 29 cm
     html = html.replace(/\\np\[([^\]]*)\]\{([^}]*)\}/g, '$2 $1');
     html = html.replace(/\\np\{([^}]*)\}/g, '$1');
+    // \np suivi directement d'un nombre sans accolades : \np2000 → 2000
+    html = html.replace(/\\np(\d+)/g, '$1');
     html = html.replace(/\\text\{([^}]*)\}/g, '$1');
     html = html.replace(/\\hfill/g, ' ');
     html = html.replace(/\\degres/g, '°');
