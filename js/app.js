@@ -1434,37 +1434,55 @@ function createFinalExercisesData() {
 // Regénérer exercisesData avec les compétences configurées dans le barème
 function applyBaremeCompetencesToExercisesData() {
     console.log('🔄 Application des compétences du barème...');
-    
+
     // Pour chaque exercice dans exercisesData
     Object.keys(exercisesData).forEach(exNum => {
         const exercise = exercisesData[exNum];
         const baremeData = appState.baremeConfig.exercises[exNum];
-        
-        if (!baremeData || !baremeData.questionCompetences) return;
-        
+
+        if (!baremeData) return;
+
+        // ✅ Mettre à jour le total de points de l'exercice
+        if (baremeData.totalPoints) {
+            exercise.totalPoints = baremeData.totalPoints;
+            console.log(`  Ex${exNum}: totalPoints = ${baremeData.totalPoints}`);
+        }
+
+        if (!baremeData.questionCompetences) return;
+
         // Pour chaque question
         exercise.questions.forEach((question, qIndex) => {
             const qKey = `q${qIndex}`;
             const selectedCompNames = baremeData.questionCompetences[qKey] || [];
 
+            // ✅ Mettre à jour les points de la question depuis le barème
+            if (baremeData.questionPoints && baremeData.questionPoints[qKey] !== undefined) {
+                question.points = baremeData.questionPoints[qKey];
+            }
+
             if (selectedCompNames.length === 0) return;
 
-            // Récupérer les points de cette question depuis le barème
-            const questionPoints = baremeData.questionPoints && baremeData.questionPoints[qKey]
-                ? baremeData.questionPoints[qKey]
-                : question.points;
+            // Récupérer les points de cette question
+            const questionPoints = question.points;
 
-            // Calculer les points par compétence (divisé équitablement entre les compétences)
-            const pointsPerCompetence = questionPoints / selectedCompNames.length;
+            // ✅ Utiliser questionCompetencePoints si disponible, sinon diviser équitablement
+            const hasCompetencePoints = baremeData.questionCompetencePoints &&
+                                        baremeData.questionCompetencePoints[qKey];
 
             // Remplacer les compétences par celles sélectionnées dans le barème
             question.competences = selectedCompNames.map(compName => {
                 const defaultComp = defaultCompetences.find(dc => dc.name === compName);
 
+                // ✅ Récupérer les points spécifiques pour cette compétence
+                let competencePoints;
+                if (hasCompetencePoints && baremeData.questionCompetencePoints[qKey][compName] !== undefined) {
+                    competencePoints = baremeData.questionCompetencePoints[qKey][compName];
+                } else {
+                    // Diviser équitablement si pas de points spécifiques
+                    competencePoints = questionPoints / selectedCompNames.length;
+                }
+
                 // Récupérer les détails personnalisés depuis le barème
-                // Priorité 1 : détails au niveau question (questionCompetenceDetails)
-                // Priorité 2 : détails au niveau exercice (competenceDetails)
-                // Priorité 3 : valeurs par défaut
                 const questionDetails = baremeData.questionCompetenceDetails &&
                                       baremeData.questionCompetenceDetails[qKey] &&
                                       baremeData.questionCompetenceDetails[qKey][compName];
@@ -1472,7 +1490,6 @@ function applyBaremeCompetencesToExercisesData() {
                 const exerciseDetails = baremeData.competenceDetails &&
                                        baremeData.competenceDetails[compName];
 
-                // Utiliser questionDetails en priorité, sinon exerciseDetails, sinon défaut
                 const customDetails = questionDetails || exerciseDetails;
 
                 return {
@@ -1480,13 +1497,15 @@ function applyBaremeCompetencesToExercisesData() {
                     color: defaultComp.color,
                     description: customDetails?.description || defaultComp.description,
                     tooltip: customDetails?.tooltip || defaultComp.description,
-                    points: customDetails?.points || pointsPerCompetence,
+                    points: competencePoints,
                     increment: customDetails?.increment || 0.5
                 };
             });
+
+            console.log(`    Q${qIndex}: ${question.points}pts, compétences:`, question.competences.map(c => `${c.name}=${c.points}`));
         });
     });
-    
+
     console.log('✅ Compétences du barème appliquées à exercisesData');
 }
 
