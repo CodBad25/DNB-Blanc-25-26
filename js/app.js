@@ -5441,6 +5441,10 @@ function renderExerciseContent(exerciseNumber) {
     const exercise = exercisesData[exerciseNumber];
     const candidate = appState.activeCandidates[appState.currentCandidateIndex];
 
+    // ✅ Récupérer les données parsées pour avoir les vraies corrections
+    const dnbId = exercise.dnbId;
+    const parsedExercise = dnbId && appState.parsedExercises ? appState.parsedExercises[dnbId] : null;
+
     // 🔧 Calculer les compétences de l'exercice
     const exerciseCompetences = {};
     exercise.questions.forEach(question => {
@@ -5509,12 +5513,12 @@ function renderExerciseContent(exerciseNumber) {
         <div class="questions-grid">
     `;
 
-    exercise.questions.forEach(question => {
+    exercise.questions.forEach((question, qIndex) => {
         const candidateScore = getCandidateQuestionScore(candidate.number, exerciseNumber, question.id);
         const quickButtonState = getQuickButtonState(candidate.number, exerciseNumber, question.id);
-        
+
         const questionProgressState = getQuestionProgressState(candidate.number, exerciseNumber, question.id);
-        
+
         html += `
             <div class="question-card" data-question-id="${question.id}">
                 <div class="question-progress-indicator progress-indicator ${questionProgressState}"></div>
@@ -5523,13 +5527,13 @@ function renderExerciseContent(exerciseNumber) {
                         <div class="question-title">${question.title} (${question.points} pts)</div>
                     </div>
                 </div>
-                
-                <div class="question-text">${question.statement}</div>
-                
+
+                <div class="question-text" id="enonce_corr_${exerciseNumber}_${qIndex}">${question.statement}</div>
+
                 <div class="answer-section">
                     <div class="answer-label">Réponse attendue :</div>
-                    <div class="answer-content">
-                        ${question.answer.split('\n').map(line => `<p>${line}</p>`).join('')}
+                    <div class="answer-content" id="correction_corr_${exerciseNumber}_${qIndex}">
+                        <!-- Rempli dynamiquement -->
                     </div>
                 </div>
                 
@@ -5608,16 +5612,43 @@ function renderExerciseContent(exerciseNumber) {
     });
 
     html += '</div>';
-    
+
     const exerciseContent = document.getElementById(`exercise${exerciseNumber}Content`);
     exerciseContent.innerHTML = html;
-    
+
+    // ✅ Remplir les énoncés et corrections depuis parsedExercise (comme la page barème)
+    exercise.questions.forEach((question, qIndex) => {
+        const enonceDiv = document.getElementById(`enonce_corr_${exerciseNumber}_${qIndex}`);
+        const correctionDiv = document.getElementById(`correction_corr_${exerciseNumber}_${qIndex}`);
+
+        // Énoncé depuis parsedExercise si disponible
+        if (enonceDiv && parsedExercise && parsedExercise.questions && parsedExercise.questions[qIndex]) {
+            const qItem = parsedExercise.questions[qIndex];
+            const qText = typeof qItem === 'object' ? qItem.content : qItem;
+            enonceDiv.innerHTML = qText;
+        }
+
+        // Correction depuis parsedExercise si disponible, sinon depuis question.answer
+        if (correctionDiv) {
+            let correction = 'Pas de correction disponible';
+
+            if (parsedExercise && parsedExercise.corrections && parsedExercise.corrections[qIndex]) {
+                const corrItem = parsedExercise.corrections[qIndex];
+                correction = typeof corrItem === 'object' ? corrItem.content : corrItem;
+            } else if (question.answer && question.answer !== 'Correction à venir') {
+                correction = question.answer;
+            }
+
+            correctionDiv.innerHTML = correction;
+        }
+    });
+
     // Rendre les formules mathématiques avec KaTeX (comme dans la page barème)
     setTimeout(() => {
         renderKatexInElement(exerciseContent);
         renderScratchblocksInElement(exerciseContent);
     }, 50);
-    
+
     updateExerciseScore(exerciseNumber);
 }
 

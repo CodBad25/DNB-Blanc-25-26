@@ -66,7 +66,8 @@ function createPackData() {
         selectedExercises: appState.selectedExercises || [],
         baremeConfig: appState.baremeConfig || {},
         automatismes: appState.selectedAutomatismes || [],
-        parsedAutomatismes: appState.parsedAutomatismes || {}
+        parsedAutomatismes: appState.parsedAutomatismes || {},
+        parsedExercises: appState.parsedExercises || {}  // ✅ Ajouter les exercices parsés avec corrections
     };
 }
 
@@ -246,6 +247,11 @@ function startCorrectionFromPack() {
     appState.baremeConfig = packData.baremeConfig || {};
     appState.selectedAutomatismes = packData.automatismes || [];
     appState.parsedAutomatismes = packData.parsedAutomatismes || {};
+    appState.parsedExercises = packData.parsedExercises || {};  // ✅ Charger les exercices parsés
+
+    console.log('📦 Pack chargé:');
+    console.log('  - exercisesData:', Object.keys(exercisesData));
+    console.log('  - parsedExercises:', Object.keys(appState.parsedExercises));
 
     // Fermer la modale
     closePackRecapModal();
