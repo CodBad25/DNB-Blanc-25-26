@@ -4062,63 +4062,50 @@ function generateExercisesDataFromSelection() {
 }
 
 // Générer dynamiquement les onglets d'exercices
-// Mapping des tags vers titres courts et icônes (caractères Unicode simples)
-const TAG_TO_DISPLAY = {
-    'Pythagore': { title: 'Géométrie', icon: '△' },
-    'Thalès': { title: 'Géométrie', icon: '△' },
-    'Trigonométrie': { title: 'Trigonométrie', icon: '△' },
-    'Probabilités': { title: 'Probabilités', icon: '⚄' },
-    'Algorithmique-programmation': { title: 'Scratch', icon: '⌨' },
-    'Scratch': { title: 'Scratch', icon: '⌨' },
-    'Pourcentages': { title: 'Pourcentages', icon: '%' },
-    'Fractions': { title: 'Fractions', icon: '½' },
-    'Statistiques': { title: 'Statistiques', icon: '◆' },
-    'Fonctions': { title: 'Fonctions', icon: 'ƒ' },
-    'Calcul numérique': { title: 'Calculs', icon: 'Σ' },
-    'Calcul littéral': { title: 'Calcul littéral', icon: 'x' },
-    'Arithmétique': { title: 'Arithmétique', icon: '#' },
-    'Équations': { title: 'Équations', icon: '=' },
-    'Volumes': { title: 'Volumes', icon: '◇' },
-    'Aires': { title: 'Aires', icon: '□' },
-    'Vitesse': { title: 'Vitesse', icon: '→' },
-    "Prise d'initiatives": { title: 'Problème', icon: '?' },
-    'Tableur': { title: 'Tableur', icon: '▦' },
-    'QCM': { title: 'QCM', icon: '☑' },
+// Mapping direct des exercices BB1 vers noms contextuels et icônes SVG
+const BB1_EXERCISES = {
+    'dnb_2017_12_wallisfutuna_7': {
+        title: 'Course',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>'
+    },
+    'dnb_2016_04_pondichery_3': {
+        title: 'Bonbons',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3" stroke="currentColor" stroke-width="2" fill="none"/></svg>'
+    },
+    'dnb_2019_06_asie_2': {
+        title: 'CO2',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>'
+    },
+    'dnb_2017_11_ameriquesud_6': {
+        title: 'Scratch',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
+    },
+    'dnb_2019_11_ameriquesud_5': {
+        title: 'Trajet',
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>'
+    }
 };
 
 // Obtenir le titre court et l'icône depuis les tags d'un exercice
 function getExerciseDisplayInfo(exercise) {
     const dnbId = exercise.dnbId;
-    const dnbData = appState.dnbData[dnbId];
 
-    if (dnbData && dnbData.tags && dnbData.tags.length > 0) {
-        // Chercher le premier tag qui a un mapping
-        for (const tag of dnbData.tags) {
-            if (TAG_TO_DISPLAY[tag]) {
-                return TAG_TO_DISPLAY[tag];
-            }
-        }
-        // Si pas de mapping, utiliser le premier tag comme titre
-        return { title: dnbData.tags[0], icon: '📝' };
+    // D'abord vérifier si c'est un exercice BB1 avec mapping direct
+    if (dnbId && BB1_EXERCISES[dnbId]) {
+        return BB1_EXERCISES[dnbId];
     }
 
-    return { title: 'Exercice', icon: '📝' };
+    return { title: 'Exercice', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>' };
 }
 
 // Variante qui prend directement un dnbId
 function getExerciseDisplayInfoFromDnbId(dnbId) {
-    const dnbData = appState.dnbData[dnbId];
-
-    if (dnbData && dnbData.tags && dnbData.tags.length > 0) {
-        for (const tag of dnbData.tags) {
-            if (TAG_TO_DISPLAY[tag]) {
-                return TAG_TO_DISPLAY[tag];
-            }
-        }
-        return { title: dnbData.tags[0], icon: '📝' };
+    // D'abord vérifier si c'est un exercice BB1 avec mapping direct
+    if (dnbId && BB1_EXERCISES[dnbId]) {
+        return BB1_EXERCISES[dnbId];
     }
 
-    return { title: 'Exercice', icon: '📝' };
+    return { title: 'Exercice', icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>' };
 }
 
 function renderExerciseTabs() {
