@@ -1289,8 +1289,12 @@ async function continueToSetup() {
         appState.baremeConfig.exercises = {};
         appState.baremeConfig.totalMax = 20; // DNB 2025 est sur 20 points
         
-        // Ex1 (Automatismes) : totalPoints = nombre de questions, 1 pt/question par défaut
-        if (exercisesData[1]) {
+        // Déterminer le numéro de départ des exercices DNB
+        const skipAutomatismes = window.workflowState?.skipAutomatismes;
+        const startNum = skipAutomatismes ? 1 : 2;
+
+        // Ex1 (Automatismes) : seulement si on ne les saute pas
+        if (!skipAutomatismes && exercisesData[1] && exercisesData[1].isAutomatismes) {
             const nbQuestions = exercisesData[1].questions.length;
             const questionPoints = {};
             for (let i = 0; i < nbQuestions; i++) {
@@ -1307,10 +1311,11 @@ async function continueToSetup() {
             };
         }
 
-        // Ex2-5 (DNB) : totalPoints = nombre de questions, 1 pt/question par défaut
+        // Exercices DNB : numérotation dynamique selon skipAutomatismes
         console.log('🔧 Initialisation du barème pour les exercices DNB...');
+        console.log(`📌 skipAutomatismes=${skipAutomatismes}, startNum=${startNum}`);
         appState.selectedExercises.forEach((exerciseId, index) => {
-            const exerciseNum = index + 2; // Ex2, Ex3, Ex4, Ex5
+            const exerciseNum = index + startNum; // Ex1-5 si skip, Ex2-6 sinon
             const exerciseData = exercisesData[exerciseNum];
             const nbQuestions = exerciseData ? exerciseData.questions.length : 0;
 
@@ -1350,17 +1355,26 @@ async function continueToSetup() {
     }
 }
 
-// Créer exercisesData final avec Ex1 + Ex2-5
+// Créer exercisesData final avec Ex1 + Ex2-5 (ou Ex1-5 si skip automatismes)
 function createFinalExercisesData() {
-    // Ex1 est déjà dans exercisesData (créé par createExercise1FromAutomatismes)
+    // Déterminer le numéro de départ des exercices DNB
+    const skipAutomatismes = window.workflowState?.skipAutomatismes;
+    const startNum = skipAutomatismes ? 1 : 2;
 
     console.log('🔧 createFinalExercisesData - Début');
     console.log('📋 selectedExercises:', appState.selectedExercises);
     console.log('📊 parsedExercises:', appState.parsedExercises);
+    console.log(`📌 skipAutomatismes=${skipAutomatismes}, startNum=${startNum}`);
 
-    // Ajouter les exercices DNB comme Ex2, Ex3, Ex4, Ex5
+    // Si on saute les automatismes, supprimer les données de démo de l'exercice 1
+    if (skipAutomatismes && exercisesData[1] && !exercisesData[1].isAutomatismes) {
+        console.log('🗑️ Suppression des données de démo de exercisesData[1]');
+        delete exercisesData[1];
+    }
+
+    // Ajouter les exercices DNB avec numérotation dynamique
     appState.selectedExercises.forEach((exerciseId, index) => {
-        const exerciseNum = index + 2; // Ex2, Ex3, Ex4, Ex5
+        const exerciseNum = index + startNum; // Ex1-5 si skip, Ex2-6 sinon
         const parsedExercise = appState.parsedExercises[exerciseId];
         const dnbData = appState.dnbData[exerciseId];
 
@@ -1745,8 +1759,9 @@ function renderBaremeExerciseTabs() {
         const icon = defaultIcons[index] || '📝';
         const isActive = index === currentBaremeExerciseIndex;
         
-        // Titre différent pour Ex1 (Automatismes)
-        const exTitle = exerciseNum === '1' ? 'Ex1 (Automatismes)' : `Exercice ${exerciseNum}`;
+        // Titre différent pour Ex1 (Automatismes) - seulement si c'est vraiment un automatisme
+        const isAutomatismeEx = exerciseNum === '1' && exercisesData[1]?.isAutomatismes;
+        const exTitle = isAutomatismeEx ? 'Ex1 (Automatismes)' : `Exercice ${exerciseNum}`;
 
         // Vérifier la cohérence des points
         const consistency = checkExercisePointsConsistency(exerciseNum);
@@ -1791,7 +1806,8 @@ function showBaremeExercise(exerciseIndex) {
     const baremeData = appState.baremeConfig.exercises[exerciseNum];
 
     // Déterminer le type d'exercice et afficher la bonne page
-    if (exerciseNum === '1') {
+    const isAutomatismeEx = exerciseNum === '1' && exercisesData[1]?.isAutomatismes;
+    if (isAutomatismeEx) {
         // Automatismes
         showBaremeExercise1Automatismes();
     } else if (baremeData.source === 'mathalea') {
@@ -3065,13 +3081,13 @@ function continueToCandidates() {
 // Charger et parser tous les exercices sélectionnés
 async function loadAndParseSelectedExercises() {
     appState.parsedExercises = {};
-    
+
     const promises = appState.selectedExercises.map(async (exerciseId) => {
         const data = appState.dnbData[exerciseId];
         const year = data.annee;
         const texPath = `dnb/${year}/tex/${exerciseId}.tex`;
         const texCorPath = `dnb/${year}/tex/${exerciseId}_cor.tex`;
-        
+
         try {
             const [latexContent, latexCorrection] = await Promise.all([
                 fetch(texPath).then(r => r.text()),

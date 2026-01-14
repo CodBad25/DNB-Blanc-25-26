@@ -1,0 +1,21 @@
+{
+  "versions": [
+    {
+      "id": "v_2025-11-16_enrichi",
+      "date": "2025-11-16T09:40:21.914Z",
+      "description": "Fichiers .tex enrichis avec images UPDF",
+      "files": [
+        "dnb_2025_06_ameriquenord_1.tex",
+        "dnb_2025_06_ameriquenord_2.tex",
+        "dnb_2025_06_ameriquenord_3.tex",
+        "dnb_2025_06_ameriquenord_4.tex",
+        "dnb_2025_06_ameriquenord_5.tex"
+      ]
+    }
+  ],
+  "activeVersion": "original",
+  "availableVersions": [
+    "original",
+    "v_2025-11-16_enrichi"
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "dnb_2025_06_ameriquenord_1": {
+    "exerciceNum": 1,
+    "sujet": "Amérique du Nord ^",
+    "points": 20,
+    "questions": [
+      {
+        "numero": 1,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_1_q1.png",
+        "latex": "Quelle est la moyenne des tailles des élèves de cette classe ?",
+        "sousQuestions": []
+      },
+      {
+        "numero": 2,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_1_q2.png",
+        "latex": "Quelle est la médiane des tailles des élèves de cette classe ?",
+        "sousQuestions": []
+      }
+    ]
+  },
+  "dnb_2025_06_ameriquenord_4": {
+    "exerciceNum": 4,
+    "sujet": "Amérique du Nord ^",
+    "points": 20,
+    "questions": [
+      {
+        "numero": 1,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_4_q1.png",
+        "latex": "Le temps et la distance parcourue par Malo sont-ils proportionnels ?",
+        "sousQuestions": []
+      },
+      {
+        "numero": 2,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_4_q2.png",
+        "latex": "Quelle distance Malo a-t-il parcourue au bout de 20 minutes ?\n\nAucune justification n'est attendue.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 3,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_4_q3.png",
+        "latex": "Combien de temps a-t-il mis pour faire les 9 premiers kilomètres ?\n\nAucune justification n'est attendue.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 4,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_4_q4.png",
+        "latex": "Quelle est la vitesse moyenne de Malo lors de cette course? Exprimer le résultat au dixième de km/h près.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 5,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_4_q5.png",
+        "latex": "Louise et Hillal ont couru sur le même parcours de $13,5$ km. Louise à une vitesse régulière égale à $12$~km/h et Hillal a une vitesse régulière égale à $10$ km/h",
+        "sousQuestions": [
+          {
+            "lettre": "a",
+            "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_4_q5a.png",
+            "latex": "Sachant que Louise et Hillal sont partis en même temps, qui a été le premier à"
+          },
+          {
+            "lettre": "b",
+            "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_4_q5b.png",
+            "latex": "Quelle distance sépare Louise et Hillal, lorsque le premier des deux franchit la ligne d'arrivée ?"
+          }
+        ]
+      }
+    ]
+  },
+  "dnb_2025_06_ameriquenord_5": {
+    "exerciceNum": 5,
+    "sujet": "Amérique du Nord ^",
+    "points": 19,
+    "questions": [
+      {
+        "numero": 1,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_5_q1.png",
+        "latex": "Les scripts 1 et 2 permettent chacun d'obtenir un des dessins ci-dessous. Associer chacun des scripts à son dessin.\n\n\\begin{center}\n\\begin{tabularx}{\\linewidth}{|*{2}{>{\\centering \\arraybackslash}X|}}\\hline\nDessin 1&Dessin 2\\\\ \\hline\n\\psset{unit=0.9cm}\n\\begin{pspicture}(-1.5,-1.5)(1.5,1.3)\n\\pspolygon(1.5;0)(1.5;60)(1.5;120)(1.5;180)(1.5;240)(1.5;300)\n\\end{pspicture}&\n\\psset{unit=1cm}\n\\begin{pspicture}(-1.8,-1)(1.8,1.8)\n\\pspolygon(1.4;-30)(1.4;90)(1.4;210)\n\\end{pspicture}\\\\ \\hline\n\\end{tabularx}\n\\end{center}\n\n\n\\begin{minipage}{0.55\\linewidth}",
+        "sousQuestions": []
+      },
+      {
+        "numero": 2,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_5_q2.png",
+        "latex": "Le script 3 permet d'obtenir le losange ci-contre.\n\nLa partie du script effacée contient les 3 instructions A, B et C ci-dessous.\n\nSur votre copie, recopier dans le bon ordre les instructions cachées.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 3,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_5_q3.png",
+        "latex": "Calculer la fréquence de l'affichage \\og Voici le dessin! \\fg{}.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 4,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_5_q4.png",
+        "latex": "Pourquoi ce résultat est-il différent de celui obtenu à la question 5 ?",
+        "sousQuestions": []
+      }
+    ]
+  },
+  "dnb_2025_06_ameriquenord_3": {
+    "exerciceNum": 3,
+    "sujet": "Amérique du Nord ^",
+    "points": 18,
+    "questions": [
+      {
+        "numero": 1,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_3_q1.png",
+        "latex": "Montrer que, lorsque le nombre choisi est 4, le résultat obtenu avec le programme A est 5.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 2,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_3_q2.png",
+        "latex": "Montrer que, lorsque le nombre choisi est $- 2$, le résultat obtenu avec le programme A est 5.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 3,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_3_q3.png",
+        "latex": "Justifier que l'affirmation suivante est vraie :\n\n\\begin{center}\\og Le programme A donne toujours le même résultat. \\fg\\end{center}",
+        "sousQuestions": []
+      },
+      {
+        "numero": 4,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_3_q4.png",
+        "latex": "Lorsque le nombre choisi est 10, quel résultat obtient-on avec le programme B ?",
+        "sousQuestions": []
+      },
+      {
+        "numero": 5,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_3_q5.png",
+        "latex": "Il existe exactement deux nombres pour lesquels les programmes A et B fournissent à chaque fois des résultats identiques.\n\nQuels sont ces deux nombres?",
+        "sousQuestions": []
+      }
+    ]
+  },
+  "dnb_2025_06_ameriquenord_2": {
+    "exerciceNum": 2,
+    "sujet": "Amérique du Nord ^",
+    "points": 23,
+    "questions": [
+      {
+        "numero": 1,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_2_q1.png",
+        "latex": "Calculer la longueur AB.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 2,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_2_q2.png",
+        "latex": "Montrer que les droites (DE) et (BC) sont parallèles.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 3,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_2_q3.png",
+        "latex": "Montrer que la longueur DE est égale à $42$~m.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 4,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_2_q4.png",
+        "latex": "Montrer que la longueur EM est environ égale à $24,2$~m.",
+        "sousQuestions": []
+      },
+      {
+        "numero": 5,
+        "pngPath": "dnb/2025/tex/png/questions/dnb_2025_06_ameriquenord_2_q5.png",
+        "latex": "En déduire l'aire du triangle AMD.",
+        "sousQuestions": []
+      }
+    ]
+  }
+}
