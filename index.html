@@ -18,12 +18,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .container {
-            max-width: 600px;
-            width: 90%;
+            max-width: 500px;
+            width: 100%;
             text-align: center;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            font-size: 3em;
         }
 
         .header {
@@ -32,145 +46,376 @@
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.8em;
             margin-bottom: 10px;
             text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-weight: 800;
         }
 
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
+        .header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 500;
         }
 
-        .cards {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .header .date {
+            margin-top: 8px;
+            font-size: 1em;
+            opacity: 0.8;
+            font-weight: 400;
         }
 
-        .card {
+        .main-card {
             background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            margin-bottom: 20px;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        .exercises-preview {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
         }
 
-        .card-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+        .exercise-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
         }
 
-        .card-title {
-            font-size: 1.4em;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 10px;
+        .exercise-chip svg {
+            width: 18px;
+            height: 18px;
+            color: #667eea;
         }
 
-        .card-description {
-            color: #666;
-            line-height: 1.6;
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
-        .card-btn {
-            margin-top: 20px;
-            padding: 12px 30px;
+        .info-item {
+            text-align: center;
+            padding: 15px 10px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .info-value {
+            font-size: 1.8em;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .info-label {
+            font-size: 0.85em;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 18px 30px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
+            border-radius: 14px;
+            font-size: 1.2em;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .card-btn:hover {
-            transform: scale(1.05);
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .start-btn:active {
+            transform: translateY(0);
+        }
+
+        .secondary-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .secondary-btn {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
         }
 
         .footer {
             margin-top: 30px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85em;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animation d'entrée */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo { animation: fadeInUp 0.6s ease-out; }
+        .header { animation: fadeInUp 0.6s ease-out 0.1s both; }
+        .main-card { animation: fadeInUp 0.6s ease-out 0.2s both; }
+        .secondary-actions { animation: fadeInUp 0.6s ease-out 0.3s both; }
+        .footer { animation: fadeInUp 0.6s ease-out 0.4s both; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .header h1 { font-size: 2em; }
+            .info-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .info-value { font-size: 1.4em; }
+            .main-card { padding: 25px 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="logo">📐</div>
+
         <div class="header">
-            <h1>DNB Blanc 25-26</h1>
-            <p>Correcteur de Brevet Blanc</p>
+            <h1>DNB Blanc n°1</h1>
+            <div class="subtitle">Correcteur de Mathématiques</div>
+            <div class="date">9 décembre 2025</div>
         </div>
 
-        <div class="cards">
-            <!-- Concepteur -->
-            <div class="card" onclick="window.location.href='app.html'">
-                <div class="card-icon">🎨</div>
-                <div class="card-title">Concevoir un sujet</div>
-                <div class="card-description">
-                    Sélectionnez les exercices, configurez le barème et exportez un pack sujet pour les correcteurs
+        <div class="main-card">
+            <div class="exercises-preview">
+                <div class="exercise-chip">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+                    Course
                 </div>
-                <button class="card-btn">Commencer la conception</button>
+                <div class="exercise-chip">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    Bonbons
+                </div>
+                <div class="exercise-chip">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    CO2
+                </div>
+                <div class="exercise-chip">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Scratch
+                </div>
+                <div class="exercise-chip">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+                    Trajet
+                </div>
             </div>
 
-            <!-- Correcteur -->
-            <div class="card" onclick="loadSubjectPack()">
-                <div class="card-icon">✏️</div>
-                <div class="card-title">Charger un pack sujet</div>
-                <div class="card-description">
-                    Importez un pack sujet pré-configuré et commencez directement la correction
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-value">5</div>
+                    <div class="info-label">Exercices</div>
                 </div>
-                <button class="card-btn">Importer un pack</button>
-                <input type="file" id="packFileInput" accept=".json" style="display: none;" onchange="handlePackImport(event)">
+                <div class="info-item">
+                    <div class="info-value">20</div>
+                    <div class="info-label">Points</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">12</div>
+                    <div class="info-label">Questions</div>
+                </div>
             </div>
 
-            <!-- BB1 Direct -->
-            <div class="card" onclick="loadBB1()" style="border: 3px solid #6f42c1;">
-                <div class="card-icon">📋</div>
-                <div class="card-title">DNB Blanc n°1</div>
-                <div class="card-description">
-                    Sujet du 9 décembre 2025 avec barème pré-configuré (5 exercices, 20 points)
-                </div>
-                <button class="card-btn" style="background: linear-gradient(135deg, #6f42c1 0%, #9b59b6 100%);">Charger BB1</button>
-            </div>
+            <button class="start-btn" onclick="startCorrection()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                Commencer la correction
+            </button>
+        </div>
+
+        <div class="secondary-actions">
+            <button class="secondary-btn" onclick="goToBareme()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20V10M6 20V4M18 20v-6"/>
+                </svg>
+                Voir le barème
+            </button>
+            <button class="secondary-btn" onclick="goToConception()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Concevoir un sujet
+            </button>
         </div>
 
         <div class="footer">
-            Créé avec ❤️ par Badri BELHAJ
+            Créé avec ❤️ par <a href="#">Badri BELHAJ</a>
         </div>
     </div>
 
     <script>
-        function loadSubjectPack() {
-            document.getElementById('packFileInput').click();
+        // Configuration BB1
+        const bb1Config = {
+            skipAutomatismes: true,
+            selectedExercises: [
+                "dnb_2017_12_wallisfutuna_7",
+                "dnb_2016_04_pondichery_3",
+                "dnb_2019_06_asie_2",
+                "dnb_2017_11_ameriquesud_6",
+                "dnb_2019_11_ameriquesud_5"
+            ],
+            baremeConfig: {
+                mode: "b",
+                totalMax: 20,
+                exercises: {
+                    "1": {
+                        totalPoints: 6,
+                        dnbId: "dnb_2017_12_wallisfutuna_7",
+                        questionPoints: { q0: 2.5, q1: 2.5, q2: 1 },
+                        questionCompetences: {
+                            q0: ["Modéliser", "Calculer"],
+                            q1: ["Modéliser", "Calculer"],
+                            q2: ["Calculer"]
+                        },
+                        questionCompetencePoints: {
+                            q0: { "Modéliser": 1, "Calculer": 1.5 },
+                            q1: { "Modéliser": 1, "Calculer": 1.5 },
+                            q2: { "Calculer": 1 }
+                        }
+                    },
+                    "2": {
+                        totalPoints: 4,
+                        dnbId: "dnb_2016_04_pondichery_3",
+                        questionPoints: { q0: 1, q1: 0.5, q2: 0.5, q3: 1, q4: 1 },
+                        questionCompetences: {
+                            q0: ["Chercher"], q1: ["Chercher"], q2: ["Chercher"],
+                            q3: ["Raisonner"], q4: ["Raisonner"]
+                        },
+                        questionCompetencePoints: {
+                            q0: { "Chercher": 1 }, q1: { "Chercher": 0.5 }, q2: { "Chercher": 0.5 },
+                            q3: { "Raisonner": 1 }, q4: { "Raisonner": 1 }
+                        }
+                    },
+                    "3": {
+                        totalPoints: 3,
+                        dnbId: "dnb_2019_06_asie_2",
+                        questionPoints: { q0: 1.5, q1: 1.5 },
+                        questionCompetences: {
+                            q0: ["Calculer", "Chercher"],
+                            q1: ["Calculer", "Chercher"]
+                        },
+                        questionCompetencePoints: {
+                            q0: { "Calculer": 1, "Chercher": 0.5 },
+                            q1: { "Calculer": 1, "Chercher": 0.5 }
+                        }
+                    },
+                    "4": {
+                        totalPoints: 4,
+                        dnbId: "dnb_2017_11_ameriquesud_6",
+                        questionPoints: { q0: 1, q1: 1, q2: 1, q3: 1 },
+                        questionCompetences: {
+                            q0: ["Modéliser"], q1: ["Modéliser"], q2: ["Modéliser"], q3: ["Modéliser"]
+                        },
+                        questionCompetencePoints: {
+                            q0: { "Modéliser": 1 }, q1: { "Modéliser": 1 }, q2: { "Modéliser": 1 }, q3: { "Modéliser": 1 }
+                        }
+                    },
+                    "5": {
+                        totalPoints: 3,
+                        dnbId: "dnb_2019_11_ameriquesud_5",
+                        questionPoints: { q0: 1, q1: 2 },
+                        questionCompetences: {
+                            q0: ["Chercher"],
+                            q1: ["Communiquer"]
+                        },
+                        questionCompetencePoints: {
+                            q0: { "Chercher": 1 },
+                            q1: { "Communiquer": 2 }
+                        }
+                    }
+                }
+            }
+        };
+
+        // Démarrer la correction directement
+        function startCorrection() {
+            // Sauvegarder la config BB1
+            localStorage.setItem('dnb_bb1_config', JSON.stringify(bb1Config));
+            localStorage.setItem('dnb_skipAutomatismes', 'true');
+            localStorage.setItem('dnb_disableGuidance', 'true');
+            localStorage.setItem('dnb_direct_correction', 'true');
+
+            // Aller directement à l'app en mode correction directe
+            window.location.href = 'app.html?mode=bb1&direct=true';
         }
 
-        function handlePackImport(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // Voir/Modifier le barème
+        function goToBareme() {
+            localStorage.setItem('dnb_bb1_config', JSON.stringify(bb1Config));
+            localStorage.setItem('dnb_skipAutomatismes', 'true');
+            localStorage.setItem('dnb_disableGuidance', 'true');
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const packData = JSON.parse(e.target.result);
-                    // Stocker le pack dans localStorage
-                    localStorage.setItem('dnb_subject_pack', JSON.stringify(packData));
-                    localStorage.setItem('dnb_correction_mode', 'true');
-                    // Rediriger vers l'app en mode correction
-                    window.location.href = 'app.html?mode=correction';
-                } catch (err) {
-                    alert('Erreur lors de la lecture du fichier : ' + err.message);
-                }
-            };
-            reader.readAsText(file);
+            // Aller à l'app en mode barème
+            window.location.href = 'app.html?mode=bb1&step=bareme';
+        }
+
+        // Concevoir un nouveau sujet
+        function goToConception() {
+            // Nettoyer les configs
+            localStorage.removeItem('dnb_bb1_config');
+            localStorage.removeItem('dnb_direct_correction');
+            localStorage.removeItem('dnb_skipAutomatismes');
+            localStorage.removeItem('dnb_disableGuidance');
+
+            window.location.href = 'app.html';
         }
 
         // Vérifier si un lien avec pack encodé
@@ -185,100 +430,6 @@
             } catch (err) {
                 console.error('Erreur décodage pack URL:', err);
             }
-        }
-
-        // Charger le DNB Blanc n°1
-        function loadBB1() {
-            // Configuration BB1
-            const bb1Config = {
-                skipAutomatismes: true,
-                selectedExercises: [
-                    "dnb_2017_12_wallisfutuna_7",
-                    "dnb_2016_04_pondichery_3",
-                    "dnb_2019_06_asie_2",
-                    "dnb_2017_11_ameriquesud_6",
-                    "dnb_2019_11_ameriquesud_5"
-                ],
-                baremeConfig: {
-                    mode: "b",
-                    totalMax: 20,
-                    exercises: {
-                        "1": {
-                            totalPoints: 6,
-                            dnbId: "dnb_2017_12_wallisfutuna_7",
-                            questionPoints: { q0: 2.5, q1: 2.5, q2: 1 },
-                            questionCompetences: {
-                                q0: ["Modéliser", "Calculer"],
-                                q1: ["Modéliser", "Calculer"],
-                                q2: ["Calculer"]
-                            },
-                            questionCompetencePoints: {
-                                q0: { "Modéliser": 1, "Calculer": 1.5 },
-                                q1: { "Modéliser": 1, "Calculer": 1.5 },
-                                q2: { "Calculer": 1 }
-                            }
-                        },
-                        "2": {
-                            totalPoints: 4,
-                            dnbId: "dnb_2016_04_pondichery_3",
-                            questionPoints: { q0: 1, q1: 0.5, q2: 0.5, q3: 1, q4: 1 },
-                            questionCompetences: {
-                                q0: ["Chercher"], q1: ["Chercher"], q2: ["Chercher"],
-                                q3: ["Raisonner"], q4: ["Raisonner"]
-                            },
-                            questionCompetencePoints: {
-                                q0: { "Chercher": 1 }, q1: { "Chercher": 0.5 }, q2: { "Chercher": 0.5 },
-                                q3: { "Raisonner": 1 }, q4: { "Raisonner": 1 }
-                            }
-                        },
-                        "3": {
-                            totalPoints: 3,
-                            dnbId: "dnb_2019_06_asie_2",
-                            questionPoints: { q0: 1.5, q1: 1.5 },
-                            questionCompetences: {
-                                q0: ["Calculer", "Chercher"],
-                                q1: ["Calculer", "Chercher"]
-                            },
-                            questionCompetencePoints: {
-                                q0: { "Calculer": 1, "Chercher": 0.5 },
-                                q1: { "Calculer": 1, "Chercher": 0.5 }
-                            }
-                        },
-                        "4": {
-                            totalPoints: 4,
-                            dnbId: "dnb_2017_11_ameriquesud_6",
-                            questionPoints: { q0: 1, q1: 1, q2: 1, q3: 1 },
-                            questionCompetences: {
-                                q0: ["Modéliser"], q1: ["Modéliser"], q2: ["Modéliser"], q3: ["Modéliser"]
-                            },
-                            questionCompetencePoints: {
-                                q0: { "Modéliser": 1 }, q1: { "Modéliser": 1 }, q2: { "Modéliser": 1 }, q3: { "Modéliser": 1 }
-                            }
-                        },
-                        "5": {
-                            totalPoints: 3,
-                            dnbId: "dnb_2019_11_ameriquesud_5",
-                            questionPoints: { q0: 1, q1: 2 },
-                            questionCompetences: {
-                                q0: ["Chercher"],
-                                q1: ["Communiquer"]
-                            },
-                            questionCompetencePoints: {
-                                q0: { "Chercher": 1 },
-                                q1: { "Communiquer": 2 }
-                            }
-                        }
-                    }
-                }
-            };
-
-            // Sauvegarder la config
-            localStorage.setItem('dnb_bb1_config', JSON.stringify(bb1Config));
-            localStorage.setItem('dnb_skipAutomatismes', 'true');
-            localStorage.setItem('dnb_disableGuidance', 'true');
-
-            // Rediriger vers l'app avec le mode BB1
-            window.location.href = 'app.html?mode=bb1';
         }
     </script>
 </body>

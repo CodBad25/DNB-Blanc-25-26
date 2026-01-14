@@ -4062,27 +4062,32 @@ function generateExercisesDataFromSelection() {
 }
 
 // Générer dynamiquement les onglets d'exercices
-// Mapping direct des exercices BB1 vers noms contextuels et icônes SVG
+// Mapping direct des exercices BB1 vers noms contextuels, icônes SVG et introductions
 const BB1_EXERCISES = {
     'dnb_2017_12_wallisfutuna_7': {
         title: 'Course',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>',
+        intro: 'Pour soutenir la lutte contre l\'obésité, un collège décide d\'organiser une course. Les élèves doivent partir du point A et se rendre au point E en passant par les points B, C et D. On donne AC = 400 m, EC = 1 000 m et AB = 300 m.'
     },
     'dnb_2016_04_pondichery_3': {
         title: 'Bonbons',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3" stroke="currentColor" stroke-width="2" fill="none"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
+        intro: 'Un confiseur lance la fabrication de bonbons au chocolat et de bonbons au caramel pour remplir 50 boîtes. Chaque boîte contient 10 bonbons au chocolat et 8 bonbons au caramel.'
     },
     'dnb_2019_06_asie_2': {
         title: 'CO2',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+        intro: 'Le tableau ci-dessous présente les émissions de gaz à effet de serre pour la France et l\'Union Européenne, en millions de tonnes équivalent CO₂, en 1990 et 2013.'
     },
     'dnb_2017_11_ameriquesud_6': {
         title: 'Scratch',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+        intro: 'Le bloc d\'instruction « carré » a été programmé puis utilisé dans deux programmes. L\'instruction « avancer de 10 » fait avancer le lutin de 10 pixels.'
     },
     'dnb_2019_11_ameriquesud_5': {
         title: 'Trajet',
-        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>'
+        icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>',
+        intro: 'Une entreprise rembourse à ses employés le coût de leurs déplacements professionnels, quand les employés utilisent leur véhicule personnel.'
     }
 };
 
@@ -5514,6 +5519,10 @@ function renderExerciseContent(exerciseNumber) {
         });
     });
 
+    // Récupérer l'intro depuis BB1_EXERCISES si disponible
+    const exerciseInfo = dnbId && BB1_EXERCISES[dnbId] ? BB1_EXERCISES[dnbId] : null;
+    const introText = exerciseInfo ? exerciseInfo.intro : null;
+
     let html = `
         <div class="exercise-header">
             <div class="exercise-title-section">
@@ -5532,6 +5541,12 @@ function renderExerciseContent(exerciseNumber) {
                 </button>
             </div>
         </div>
+
+        ${introText ? `
+        <div style="margin: 15px 0; padding: 15px; background: #fff8e1; border-radius: 8px; border-left: 4px solid #ffa000; font-style: italic; color: #5d4037; line-height: 1.6;">
+            📝 <strong>Énoncé :</strong> ${introText}
+        </div>
+        ` : ''}
 
         <!-- Compétences évaluées dans cet exercice -->
         ${Object.keys(exerciseCompetences).length > 0 ? `
@@ -7780,16 +7795,34 @@ async function loadBB1Exercises() {
         // Appliquer le barème BB1
         appState.baremeConfig = bb1Config.baremeConfig;
 
-        // Marquer les étapes comme complétées
-        workflowState.completedSteps = [1, 2];
-        workflowState.currentStep = 3;
+        // Vérifier si on doit aller directement à la correction
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDirectMode = urlParams.get('direct') === 'true';
+        const goToBareme = urlParams.get('step') === 'bareme';
 
-        // Afficher la page du barème
-        showPage('baremeDesignPage');
-        renderBaremeDesignPage();
-        createWorkflowStepper();
-
-        console.log('✅ BB1 chargé avec succès');
+        if (isDirectMode) {
+            // Mode direct : aller directement aux candidats
+            workflowState.completedSteps = [1, 2, 3];
+            workflowState.currentStep = 4;
+            showPage('setupPage');
+            createWorkflowStepper();
+            console.log('✅ BB1 chargé - Mode direct vers candidats');
+        } else if (goToBareme) {
+            // Mode barème : afficher le barème
+            workflowState.completedSteps = [1, 2];
+            workflowState.currentStep = 3;
+            showPage('baremeDesignPage');
+            renderBaremeDesignPage();
+            createWorkflowStepper();
+            console.log('✅ BB1 chargé - Affichage barème');
+        } else {
+            // Mode par défaut : aller aux candidats (comportement simplifié)
+            workflowState.completedSteps = [1, 2, 3];
+            workflowState.currentStep = 4;
+            showPage('setupPage');
+            createWorkflowStepper();
+            console.log('✅ BB1 chargé avec succès');
+        }
 
     } catch (error) {
         console.error('❌ Erreur chargement BB1:', error);
