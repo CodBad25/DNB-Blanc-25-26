@@ -5541,7 +5541,7 @@ function renderExerciseContent(exerciseNumber) {
 
                 <div class="answer-section">
                     <div class="answer-label">Réponse attendue :</div>
-                    <div class="answer-content" id="correction_corr_${exerciseNumber}_${qIndex}">
+                    <div class="answer-content always-visible" id="correction_corr_${exerciseNumber}_${qIndex}">
                         <!-- Rempli dynamiquement -->
                     </div>
                 </div>
