@@ -3103,8 +3103,29 @@ async function loadAndParseSelectedExercises() {
             ]);
             
             const parsed = parseLatexQuestions(latexContent, latexCorrection, exerciseId);
-            
+
             if (parsed) {
+                // Corrections spéciales pour l'exercice Scratch (structure imbriquée complexe)
+                if (exerciseId === 'dnb_2017_11_ameriquesud_6') {
+                    parsed.corrections = [
+                        "Le dessin n°2 est obtenu avec le programme n°1.",
+                        "Le dessin n°3 est obtenu avec le programme n°2.",
+                        `Pour le programme n°1 :<br>
+                        • Le premier carré a une longueur de côté de 10 ;<br>
+                        • le deuxième carré a une longueur de côté de 30, \\((10+20)\\) ;<br>
+                        • le troisième carré a une longueur de côté de 50, \\((30+20)\\) ;<br>
+                        • le quatrième carré a une longueur de côté de 70, \\((50+20)\\).<br><br>
+                        L'instruction <strong>avancer de 10</strong> fait avancer le lutin de 10 pixels, donc la longueur, en pixel, du côté du plus grand carré dessiné est égale à <strong>70 pixels</strong>.<br><br>
+                        Pour le programme n°2 : les dimensions du carré sont à chaque fois doublées ; la longueur, en pixel, du côté du plus grand carré dessiné est égale à <strong>80 pixels</strong>.`,
+                        "La modification 1 permet d'obtenir le dessin souhaité."
+                    ];
+                    // Limiter à 4 questions (le parseur en détecte 5 à tort)
+                    if (parsed.enonces.length > 4) {
+                        parsed.enonces = parsed.enonces.slice(0, 4);
+                    }
+                    console.log(`  ✓ ${exerciseId}: Corrections spéciales appliquées (4 questions)`);
+                }
+
                 appState.parsedExercises[exerciseId] = {
                     metadata: data,
                     questions: parsed.enonces,  // Array de strings HTML
@@ -7569,9 +7590,9 @@ async function loadBB1Exercises() {
                 "4": {
                     totalPoints: 4,
                     dnbId: "dnb_2017_11_ameriquesud_6",
-                    questionPoints: { q0: 1, q1: 1, q2: 1, q3: 1, q4: 0 },
+                    questionPoints: { q0: 1, q1: 1, q2: 1, q3: 1 },
                     questionCompetences: {
-                        q0: ["Modéliser"], q1: ["Modéliser"], q2: ["Modéliser"], q3: ["Modéliser"], q4: []
+                        q0: ["Modéliser"], q1: ["Modéliser"], q2: ["Modéliser"], q3: ["Modéliser"]
                     },
                     questionCompetencePoints: {
                         q0: { "Modéliser": 1 }, q1: { "Modéliser": 1 }, q2: { "Modéliser": 1 }, q3: { "Modéliser": 1 }
