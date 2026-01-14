@@ -41,12 +41,22 @@
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 15px;
+            padding: 10px 15px;
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
+        }
+
+        /* Page barème : utiliser toute la largeur */
+        #baremeDesignPage {
+            max-width: 100%;
+            padding: 10px;
+        }
+        #baremeDesignPage .container,
+        #baremeDesignPage > div {
+            max-width: 100%;
         }
 
         /* === PAGE DE CONFIGURATION === */
