@@ -4062,28 +4062,28 @@ function generateExercisesDataFromSelection() {
 }
 
 // Générer dynamiquement les onglets d'exercices
-// Mapping des tags vers titres courts et icônes
+// Mapping des tags vers titres courts et icônes (caractères Unicode simples)
 const TAG_TO_DISPLAY = {
-    'Pythagore': { title: 'Géométrie', icon: '📐' },
-    'Thalès': { title: 'Géométrie', icon: '📐' },
-    'Trigonométrie': { title: 'Trigonométrie', icon: '📐' },
-    'Probabilités': { title: 'Probabilités', icon: '🎲' },
-    'Algorithmique-programmation': { title: 'Scratch', icon: '💻' },
-    'Scratch': { title: 'Scratch', icon: '💻' },
-    'Pourcentages': { title: 'Pourcentages', icon: '📊' },
-    'Fractions': { title: 'Fractions', icon: '🔢' },
-    'Statistiques': { title: 'Statistiques', icon: '📈' },
-    'Fonctions': { title: 'Fonctions', icon: '📈' },
-    'Calcul numérique': { title: 'Calculs', icon: '🧮' },
-    'Calcul littéral': { title: 'Calcul littéral', icon: '🧮' },
-    'Arithmétique': { title: 'Arithmétique', icon: '🔢' },
-    'Équations': { title: 'Équations', icon: '🔣' },
-    'Volumes': { title: 'Volumes', icon: '📦' },
-    'Aires': { title: 'Aires', icon: '⬜' },
-    'Vitesse': { title: 'Vitesse', icon: '🚗' },
-    "Prise d'initiatives": { title: 'Problème', icon: '🎯' },
-    'Tableur': { title: 'Tableur', icon: '📋' },
-    'QCM': { title: 'QCM', icon: '☑️' },
+    'Pythagore': { title: 'Géométrie', icon: '△' },
+    'Thalès': { title: 'Géométrie', icon: '△' },
+    'Trigonométrie': { title: 'Trigonométrie', icon: '△' },
+    'Probabilités': { title: 'Probabilités', icon: '⚄' },
+    'Algorithmique-programmation': { title: 'Scratch', icon: '⌨' },
+    'Scratch': { title: 'Scratch', icon: '⌨' },
+    'Pourcentages': { title: 'Pourcentages', icon: '%' },
+    'Fractions': { title: 'Fractions', icon: '½' },
+    'Statistiques': { title: 'Statistiques', icon: '◆' },
+    'Fonctions': { title: 'Fonctions', icon: 'ƒ' },
+    'Calcul numérique': { title: 'Calculs', icon: 'Σ' },
+    'Calcul littéral': { title: 'Calcul littéral', icon: 'x' },
+    'Arithmétique': { title: 'Arithmétique', icon: '#' },
+    'Équations': { title: 'Équations', icon: '=' },
+    'Volumes': { title: 'Volumes', icon: '◇' },
+    'Aires': { title: 'Aires', icon: '□' },
+    'Vitesse': { title: 'Vitesse', icon: '→' },
+    "Prise d'initiatives": { title: 'Problème', icon: '?' },
+    'Tableur': { title: 'Tableur', icon: '▦' },
+    'QCM': { title: 'QCM', icon: '☑' },
 };
 
 // Obtenir le titre court et l'icône depuis les tags d'un exercice
