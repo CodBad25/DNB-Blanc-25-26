@@ -19,7 +19,7 @@
     <script src="js/modules/generateursAutomatismes.js?v=20251105004"></script>
     <!-- MathALÉA Integration via RPC (comme Capytale) -->
     <script type="module" src="js/rpc-wrapper.js"></script>
-    <link rel="stylesheet" href="css/main.css?v=20260114003">
+    <link rel="stylesheet" href="css/main.css?v=20260114004">
     <style>
         body {
             margin: 0;
@@ -65,6 +65,15 @@
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
+            width: 100%;
+        }
+        /* Pleine largeur pour la page de correction */
+        body:has(#mainPage.active) #contentWrapper,
+        body:has(#mainPage.active) .container {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding-left: 5px !important;
+            padding-right: 5px !important;
         }
         /* Padding réduit quand baremeDesignPage est actif */
         #baremeDesignPage.active ~ * .container,

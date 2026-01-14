@@ -61,9 +61,20 @@
             padding: 5px !important;
         }
 
-        /* Container avec padding minimal quand mainPage (correction) est actif */
+        /* Container PLEINE LARGEUR quand mainPage (correction) est actif */
         .container:has(#mainPage.active) {
-            padding: 2px !important;
+            padding: 0 5px !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Force #contentWrapper pleine largeur */
+        #contentWrapper:has(#mainPage.active) {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
         }
 
         /* Page barème : utiliser toute la largeur */
