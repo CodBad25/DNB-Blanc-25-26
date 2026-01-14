@@ -7486,6 +7486,72 @@ saveValidationData = function() {
     checkCompletionTrigger();
 };
 
+// === CHARGEMENT BB1 ===
+async function loadBB1Exercises() {
+    console.log('📋 Chargement du DNB Blanc n°1...');
+
+    const bb1Config = JSON.parse(localStorage.getItem('dnb_bb1_config'));
+    if (!bb1Config) {
+        console.error('❌ Configuration BB1 non trouvée');
+        return;
+    }
+
+    // Fermer la modale de configuration si ouverte
+    const configModal = document.getElementById('configurationModal');
+    if (configModal) configModal.style.display = 'none';
+
+    // Configurer le workflow
+    workflowState.skipAutomatismes = true;
+    workflowState.disableGuidance = true;
+
+    // Sélectionner les exercices
+    appState.selectedExercises = bb1Config.selectedExercises;
+
+    // Charger les données DNB pour ces exercices
+    await loadDnbDataIfNeeded();
+
+    // Charger et parser les exercices
+    try {
+        await loadAndParseSelectedExercises();
+        createFinalExercisesData();
+
+        // Appliquer le barème BB1
+        appState.baremeConfig = bb1Config.baremeConfig;
+
+        // Marquer les étapes comme complétées
+        workflowState.completedSteps = [1, 2];
+        workflowState.currentStep = 3;
+
+        // Afficher la page du barème
+        renderBaremeDesignPage();
+        createWorkflowStepper();
+
+        console.log('✅ BB1 chargé avec succès');
+
+        // Nettoyer
+        localStorage.removeItem('dnb_bb1_config');
+
+    } catch (error) {
+        console.error('❌ Erreur chargement BB1:', error);
+        alert('Erreur lors du chargement du BB1: ' + error.message);
+    }
+}
+
+// Charger les données DNB si nécessaire
+async function loadDnbDataIfNeeded() {
+    if (Object.keys(appState.dnbData).length > 0) return;
+
+    try {
+        const response = await fetch('dnb/dnb_data.json');
+        if (response.ok) {
+            appState.dnbData = await response.json();
+            console.log(`✅ ${Object.keys(appState.dnbData).length} exercices DNB chargés`);
+        }
+    } catch (e) {
+        console.warn('⚠️ Impossible de charger dnb_data.json, essai avec les fichiers individuels');
+    }
+}
+
 // === INITIALISATION ===
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Correcteur Universel - Initialisation');
@@ -7503,7 +7569,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // DNB 2025 : Initialiser le workflow guidé
     initWorkflow();
     initAutomatismesData();
-    
+
+    // Vérifier le mode BB1
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'bb1') {
+        console.log('📋 Mode BB1 détecté - Chargement automatique du sujet');
+        setTimeout(() => loadBB1Exercises(), 500);
+    }
+
     // Charger les numéros de candidats depuis localStorage (DEV MODE)
     const savedStartNumber = localStorage.getItem('dnb_dev_startNumber') || '150';
     const savedEndNumber = localStorage.getItem('dnb_dev_endNumber') || '170';
