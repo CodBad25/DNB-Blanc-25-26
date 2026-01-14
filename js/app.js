@@ -3131,6 +3131,13 @@ function latexToHtml(latex, exerciceId) {
     // car \np apparaît souvent dans les formules et KaTeX ne le reconnaît pas
     html = html.replace(/\\np\[([^\]]*)\]\{([^}]*)\}/g, '$2\\text{ $1}');
     html = html.replace(/\\np\{([^}]*)\}/g, '$1');
+    // \np suivi d'un nombre (avec virgule décimale et espaces optionnels)
+    // Ex: \np5680,9 ou \np4487, 91 → 5680,9 ou 4487,91
+    html = html.replace(/\\np\s*(\d+[\d\s,]*\d*)/g, (match, num) => {
+        // Nettoyer les espaces dans le nombre
+        return num.replace(/\s+/g, '');
+    });
+    // Cas simple: \np suivi de chiffres uniquement
     html = html.replace(/\\np(\d+)/g, '$1');
 
     // ⚠️ IMPORTANT : Préserver les formules mathématiques AVANT toute autre conversion
