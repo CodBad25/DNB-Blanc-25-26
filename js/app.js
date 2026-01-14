@@ -2016,7 +2016,15 @@ function showBaremeExerciseDNB(exerciseNum) {
     const exerciseId = baremeData.dnbId;
     const parsedExercise = appState.parsedExercises[exerciseId];
     const exerciseIndex = parseInt(exerciseNum) - 1;
-    
+
+    // Initialiser selectedCompetences si absent (cas du barème BB1 pré-configuré)
+    if (!baremeData.selectedCompetences) {
+        baremeData.selectedCompetences = [];
+    }
+    if (!baremeData.pointsPerCompetence) {
+        baremeData.pointsPerCompetence = {};
+    }
+
     // Mettre à jour les onglets
     renderBaremeExerciseTabs();
     
