@@ -7572,15 +7572,22 @@ document.addEventListener('DOMContentLoaded', () => {
         window.initMathaleaPage();
     }
 
-    // DNB 2025 : Initialiser le workflow guidé
-    initWorkflow();
-    initAutomatismesData();
-
-    // Vérifier le mode BB1
+    // Vérifier le mode BB1 AVANT d'initialiser le workflow
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('mode') === 'bb1') {
-        console.log('📋 Mode BB1 détecté - Chargement automatique du sujet');
-        setTimeout(() => loadBB1Exercises(), 500);
+    const isBB1Mode = urlParams.get('mode') === 'bb1';
+
+    if (isBB1Mode) {
+        // Mode BB1 : charger directement les exercices sans passer par la configuration
+        console.log('📋 Mode BB1 détecté - Chargement direct du sujet');
+        initAutomatismesData();
+        // Appliquer les préférences BB1 (skipAutomatismes=true)
+        workflowState.skipAutomatismes = true;
+        workflowState.disableGuidance = true;
+        loadBB1Exercises();
+    } else {
+        // Mode normal : afficher la configuration
+        initWorkflow();
+        initAutomatismesData();
     }
 
     // Charger les numéros de candidats depuis localStorage (DEV MODE)
