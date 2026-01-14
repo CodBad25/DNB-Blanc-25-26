@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,62 +22,64 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 520px;
             width: 100%;
             text-align: center;
         }
 
-        .logo {
-            width: 100px;
-            height: 100px;
-            background: white;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            font-size: 3em;
-        }
-
         .header {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             color: white;
         }
 
+        .header-emoji {
+            font-size: 4em;
+            margin-bottom: 15px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         .header h1 {
-            font-size: 2.8em;
-            margin-bottom: 10px;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-size: 2.6em;
+            margin-bottom: 8px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             font-weight: 800;
         }
 
         .header .subtitle {
-            font-size: 1.3em;
+            font-size: 1.2em;
             opacity: 0.95;
             font-weight: 500;
         }
 
         .header .date {
-            margin-top: 8px;
+            margin-top: 6px;
             font-size: 1em;
-            opacity: 0.8;
-            font-weight: 400;
+            opacity: 0.85;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-top: 12px;
         }
 
         .main-card {
             background: white;
             border-radius: 24px;
-            padding: 40px 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            padding: 35px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             margin-bottom: 20px;
         }
 
         .exercises-preview {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
         }
 
@@ -85,72 +87,82 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 14px;
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
-            border-radius: 20px;
-            font-size: 0.9em;
+            padding: 10px 16px;
+            background: #f0fdf4;
+            border-radius: 25px;
+            font-size: 0.95em;
             font-weight: 600;
-            color: #4a5568;
-            border: 1px solid #e2e8f0;
+            color: #166534;
+            border: 2px solid #bbf7d0;
+            transition: all 0.2s;
         }
 
-        .exercise-chip svg {
-            width: 18px;
-            height: 18px;
-            color: #667eea;
+        .exercise-chip:hover {
+            transform: scale(1.05);
+            background: #dcfce7;
+        }
+
+        .exercise-chip .emoji {
+            font-size: 1.2em;
         }
 
         .info-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 12px;
+            margin-bottom: 25px;
         }
 
         .info-item {
             text-align: center;
-            padding: 15px 10px;
-            background: #f8fafc;
-            border-radius: 12px;
+            padding: 18px 12px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 16px;
+            border: 2px solid #fcd34d;
         }
 
         .info-value {
-            font-size: 1.8em;
+            font-size: 2em;
             font-weight: 800;
-            color: #667eea;
+            color: #92400e;
         }
 
         .info-label {
             font-size: 0.85em;
-            color: #64748b;
+            color: #a16207;
             margin-top: 4px;
+            font-weight: 600;
         }
 
         .start-btn {
             width: 100%;
-            padding: 18px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            border-radius: 14px;
-            font-size: 1.2em;
+            border-radius: 16px;
+            font-size: 1.3em;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
         }
 
         .start-btn:active {
             transform: translateY(0);
+        }
+
+        .start-btn .emoji {
+            font-size: 1.3em;
         }
 
         .secondary-actions {
@@ -161,11 +173,11 @@
         }
 
         .secondary-btn {
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.15);
+            padding: 14px 22px;
+            background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
             font-size: 0.95em;
             font-weight: 600;
             cursor: pointer;
@@ -177,24 +189,19 @@
         }
 
         .secondary-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn .emoji {
+            font-size: 1.1em;
         }
 
         .footer {
             margin-top: 30px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.85em;
-        }
-
-        .footer a {
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9em;
         }
 
         /* Animation d'entrée */
@@ -209,51 +216,50 @@
             }
         }
 
-        .logo { animation: fadeInUp 0.6s ease-out; }
-        .header { animation: fadeInUp 0.6s ease-out 0.1s both; }
-        .main-card { animation: fadeInUp 0.6s ease-out 0.2s both; }
+        .header { animation: fadeInUp 0.6s ease-out; }
+        .main-card { animation: fadeInUp 0.6s ease-out 0.15s both; }
         .secondary-actions { animation: fadeInUp 0.6s ease-out 0.3s both; }
         .footer { animation: fadeInUp 0.6s ease-out 0.4s both; }
 
         /* Responsive */
         @media (max-width: 480px) {
             .header h1 { font-size: 2em; }
-            .info-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-            .info-value { font-size: 1.4em; }
+            .info-grid { gap: 8px; }
+            .info-value { font-size: 1.5em; }
             .main-card { padding: 25px 20px; }
+            .start-btn { font-size: 1.1em; padding: 16px 20px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">📐</div>
-
         <div class="header">
+            <div class="header-emoji">🎓</div>
             <h1>DNB Blanc n°1</h1>
-            <div class="subtitle">Correcteur de Mathématiques</div>
-            <div class="date">9 décembre 2025</div>
+            <div class="subtitle">Mathématiques - Collège</div>
+            <div class="date">📅 9 décembre 2025</div>
         </div>
 
         <div class="main-card">
             <div class="exercises-preview">
                 <div class="exercise-chip">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+                    <span class="emoji">🏃</span>
                     Course
                 </div>
                 <div class="exercise-chip">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                    <span class="emoji">🍬</span>
                     Bonbons
                 </div>
                 <div class="exercise-chip">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    <span class="emoji">🌍</span>
                     CO2
                 </div>
                 <div class="exercise-chip">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span class="emoji">🐱</span>
                     Scratch
                 </div>
                 <div class="exercise-chip">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+                    <span class="emoji">🚗</span>
                     Trajet
                 </div>
             </div>
@@ -274,30 +280,24 @@
             </div>
 
             <button class="start-btn" onclick="startCorrection()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z"/>
-                </svg>
+                <span class="emoji">✏️</span>
                 Commencer la correction
             </button>
         </div>
 
         <div class="secondary-actions">
             <button class="secondary-btn" onclick="goToBareme()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 20V10M6 20V4M18 20v-6"/>
-                </svg>
+                <span class="emoji">📊</span>
                 Voir le barème
             </button>
             <button class="secondary-btn" onclick="goToConception()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"/>
-                </svg>
-                Concevoir un sujet
+                <span class="emoji">🎨</span>
+                Créer un sujet
             </button>
         </div>
 
         <div class="footer">
-            Créé avec ❤️ par <a href="#">Badri BELHAJ</a>
+            Créé avec ❤️ par Badri BELHAJ
         </div>
     </div>
 
@@ -387,13 +387,10 @@
 
         // Démarrer la correction directement
         function startCorrection() {
-            // Sauvegarder la config BB1
             localStorage.setItem('dnb_bb1_config', JSON.stringify(bb1Config));
             localStorage.setItem('dnb_skipAutomatismes', 'true');
             localStorage.setItem('dnb_disableGuidance', 'true');
             localStorage.setItem('dnb_direct_correction', 'true');
-
-            // Aller directement à l'app en mode correction directe
             window.location.href = 'app.html?mode=bb1&direct=true';
         }
 
@@ -402,19 +399,15 @@
             localStorage.setItem('dnb_bb1_config', JSON.stringify(bb1Config));
             localStorage.setItem('dnb_skipAutomatismes', 'true');
             localStorage.setItem('dnb_disableGuidance', 'true');
-
-            // Aller à l'app en mode barème
             window.location.href = 'app.html?mode=bb1&step=bareme';
         }
 
         // Concevoir un nouveau sujet
         function goToConception() {
-            // Nettoyer les configs
             localStorage.removeItem('dnb_bb1_config');
             localStorage.removeItem('dnb_direct_correction');
             localStorage.removeItem('dnb_skipAutomatismes');
             localStorage.removeItem('dnb_disableGuidance');
-
             window.location.href = 'app.html';
         }
 
