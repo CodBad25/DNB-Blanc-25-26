@@ -61,6 +61,11 @@
             padding: 5px !important;
         }
 
+        /* Container avec padding minimal quand mainPage (correction) est actif */
+        .container:has(#mainPage.active) {
+            padding: 2px !important;
+        }
+
         /* Page barème : utiliser toute la largeur */
         #baremeDesignPage {
             max-width: 100%;
@@ -70,6 +75,46 @@
         #baremeDesignPage .container,
         #baremeDesignPage > div {
             max-width: 100%;
+        }
+
+        /* Page correction : utiliser toute la largeur avec espacement minimal */
+        #mainPage {
+            max-width: 100%;
+            padding: 5px 2px;
+            width: 100%;
+        }
+        #mainPage .container,
+        #mainPage > div {
+            max-width: 100%;
+        }
+
+        /* Page correction : cartes de questions compactes */
+        #mainPage .question-card {
+            padding: 8px;
+        }
+        #mainPage .answer-section {
+            padding: 6px 8px;
+            margin-bottom: 8px;
+        }
+        #mainPage .answer-label {
+            margin-bottom: 3px;
+        }
+        #mainPage .competences-section {
+            margin-bottom: 6px;
+        }
+        #mainPage .competences-list {
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        #mainPage .quick-actions {
+            margin-top: 5px;
+        }
+        #mainPage .questions-grid {
+            gap: 8px;
+        }
+        #mainPage .exercise-header {
+            padding: 8px 0;
+            margin-bottom: 8px;
         }
 
         /* Container minimal quand on est sur la page barème */
