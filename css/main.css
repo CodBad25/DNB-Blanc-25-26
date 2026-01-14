@@ -77,15 +77,34 @@
             max-width: 100%;
         }
 
-        /* Page correction : utiliser toute la largeur avec espacement minimal */
+        /* Page correction : utiliser TOUTE la largeur de l'écran */
         #mainPage {
-            max-width: 100%;
-            padding: 5px 2px;
-            width: 100%;
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 5px 0 !important;
+            margin: 0 !important;
         }
-        #mainPage .container,
-        #mainPage > div {
+        #mainPage * {
             max-width: 100%;
+        }
+        #mainPage .tab-content {
+            padding: 10px 5px !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        #mainPage #exerciseTabsContainer {
+            width: 100% !important;
+            padding: 0 !important;
+        }
+        #mainPage .questions-grid {
+            gap: 8px;
+            width: 100% !important;
+            padding: 0 5px !important;
+        }
+        #mainPage .exercise-content {
+            width: 100% !important;
+            padding: 0 !important;
         }
 
         /* Page correction : cartes de questions compactes */
@@ -109,12 +128,16 @@
         #mainPage .quick-actions {
             margin-top: 5px;
         }
-        #mainPage .questions-grid {
-            gap: 8px;
-        }
         #mainPage .exercise-header {
-            padding: 8px 0;
+            padding: 8px 5px;
             margin-bottom: 8px;
+        }
+        #mainPage .main-header {
+            padding: 10px 5px !important;
+            margin: 0 !important;
+        }
+        #mainPage .main-tabs {
+            padding: 0 5px !important;
         }
 
         /* Container minimal quand on est sur la page barème */
