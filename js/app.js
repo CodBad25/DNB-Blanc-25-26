@@ -4048,6 +4048,49 @@ function generateExercisesDataFromSelection() {
 }
 
 // Générer dynamiquement les onglets d'exercices
+// Mapping des tags vers titres courts et icônes
+const TAG_TO_DISPLAY = {
+    'Pythagore': { title: 'Géométrie', icon: '📐' },
+    'Thalès': { title: 'Géométrie', icon: '📐' },
+    'Trigonométrie': { title: 'Trigonométrie', icon: '📐' },
+    'Probabilités': { title: 'Probabilités', icon: '🎲' },
+    'Algorithmique-programmation': { title: 'Scratch', icon: '💻' },
+    'Scratch': { title: 'Scratch', icon: '💻' },
+    'Pourcentages': { title: 'Pourcentages', icon: '📊' },
+    'Fractions': { title: 'Fractions', icon: '🔢' },
+    'Statistiques': { title: 'Statistiques', icon: '📈' },
+    'Fonctions': { title: 'Fonctions', icon: '📈' },
+    'Calcul numérique': { title: 'Calculs', icon: '🧮' },
+    'Calcul littéral': { title: 'Calcul littéral', icon: '🧮' },
+    'Arithmétique': { title: 'Arithmétique', icon: '🔢' },
+    'Équations': { title: 'Équations', icon: '🔣' },
+    'Volumes': { title: 'Volumes', icon: '📦' },
+    'Aires': { title: 'Aires', icon: '⬜' },
+    'Vitesse': { title: 'Vitesse', icon: '🚗' },
+    "Prise d'initiatives": { title: 'Problème', icon: '🎯' },
+    'Tableur': { title: 'Tableur', icon: '📋' },
+    'QCM': { title: 'QCM', icon: '☑️' },
+};
+
+// Obtenir le titre court et l'icône depuis les tags d'un exercice
+function getExerciseDisplayInfo(exercise) {
+    const dnbId = exercise.dnbId;
+    const dnbData = appState.dnbData[dnbId];
+
+    if (dnbData && dnbData.tags && dnbData.tags.length > 0) {
+        // Chercher le premier tag qui a un mapping
+        for (const tag of dnbData.tags) {
+            if (TAG_TO_DISPLAY[tag]) {
+                return TAG_TO_DISPLAY[tag];
+            }
+        }
+        // Si pas de mapping, utiliser le premier tag comme titre
+        return { title: dnbData.tags[0], icon: '📝' };
+    }
+
+    return { title: 'Exercice', icon: '📝' };
+}
+
 function renderExerciseTabs() {
     console.log('🎯 renderExerciseTabs appelée');
     console.log('📊 exercisesData:', exercisesData);
@@ -4059,39 +4102,25 @@ function renderExerciseTabs() {
         console.error('❌ Container mainTabs non trouvé!');
         return;
     }
-    
+
     tabsContainer.innerHTML = '';
-    
-    // Icônes par défaut pour les exercices
-    const defaultIcons = ['📝', '📐', '🔢', '💻', '📊', '🎯', '📈', '🧮'];
-    
+
     Object.keys(exercisesData).forEach((exerciseNum, index) => {
         const exercise = exercisesData[exerciseNum];
-        const icon = defaultIcons[index] || '📝';
         const isFirst = index === 0;
-        
+
+        // Obtenir titre et icône depuis les tags
+        const displayInfo = getExerciseDisplayInfo(exercise);
+
         const button = document.createElement('button');
         button.className = `main-tab ${isFirst ? 'active' : ''}`;
         button.onclick = () => showTab(`exercise${exerciseNum}`);
-        
-        // Extraire juste le numéro et le thème du titre
-        let displayTitle = `Ex ${exerciseNum}`;
-        if (exercise.title) {
-            // Si le titre contient ":", prendre ce qui est après
-            const parts = exercise.title.split(':');
-            if (parts.length > 1) {
-                displayTitle = parts[1].trim();
-            } else {
-                // Sinon, garder le titre complet sauf "Exercice X -"
-                displayTitle = exercise.title.replace(/^Exercice \d+ -?\s*/, '');
-            }
-        }
-        
+
         button.innerHTML = `
-            <span class="tab-icon">${icon}</span>
-            <span>${displayTitle}</span>
+            <span class="tab-icon">${displayInfo.icon}</span>
+            <span>${displayInfo.title}</span>
         `;
-        
+
         tabsContainer.appendChild(button);
     });
 }
@@ -6646,20 +6675,16 @@ function calculateCompetencesScores(candidateNumber) {
 function renderExercisesValidation(candidateNumber) {
     const container = document.getElementById('exercisesValidationGrid');
     container.innerHTML = '';
-    
+
     // Récupérer les scores par exercice depuis calculateCandidateDetails
     const details = calculateCandidateDetails(candidateNumber);
-    
-    const exercisesInfo = [
-        { name: 'Probabilités', icon: '🎲' },
-        { name: 'Géométrie', icon: '📐' },
-        { name: 'QCM', icon: '☐' },
-        { name: 'Algorithmes', icon: '💻' },
-        { name: 'Fonctions', icon: '📈' }
-    ];
-    
+
     details.exerciseScores.forEach((exerciseScore, index) => {
-        const exerciseInfo = exercisesInfo[index];
+        // Obtenir le titre et l'icône dynamiquement depuis les tags
+        const exerciseNum = exerciseScore.exerciseNumber;
+        const exercise = exercisesData[exerciseNum];
+        const displayInfo = exercise ? getExerciseDisplayInfo(exercise) : { title: `Ex ${index + 1}`, icon: '📝' };
+        const exerciseInfo = { name: displayInfo.title, icon: displayInfo.icon };
         
         // Utiliser la fonction getExerciseScoreColor pour déterminer la couleur
         const scoreColor = getExerciseScoreColor(exerciseScore, exerciseScore.exerciseNumber, candidateNumber);
@@ -6681,8 +6706,13 @@ function renderExercisesValidation(candidateNumber) {
 function renderCompetencesValidation(competencesScores) {
     const tbody = document.getElementById('competencesValidationTable');
     tbody.innerHTML = '';
-    
+
     Object.entries(competencesScores).forEach(([competenceName, data]) => {
+        // ✅ Ne pas afficher les compétences qui n'ont aucun item évalué
+        if (data.itemsTotal === 0) {
+            return;
+        }
+
         const percentage = data.max > 0 ? Math.round((data.total / data.max) * 100) : 0;
         
         let levelText = '';
@@ -6745,8 +6775,13 @@ function renderCompetencesValidation(competencesScores) {
 function renderCompetencesSynthesis(competencesScores) {
     const grid = document.getElementById('competencesSynthesisGrid');
     grid.innerHTML = '';
-    
+
     Object.entries(competencesScores).forEach(([competenceName, data]) => {
+        // ✅ Ne pas afficher les compétences qui n'ont aucun item évalué
+        if (data.itemsTotal === 0) {
+            return;
+        }
+
         const percentage = data.max > 0 ? Math.round((data.total / data.max) * 100) : 0;
         
         let levelText = '';
