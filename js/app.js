@@ -7538,17 +7538,15 @@ async function loadBB1Exercises() {
 }
 
 // Charger les données DNB si nécessaire
-async function loadDnbDataIfNeeded() {
+function loadDnbDataIfNeeded() {
     if (Object.keys(appState.dnbData).length > 0) return;
 
-    try {
-        const response = await fetch('dnb/dnb_data.json');
-        if (response.ok) {
-            appState.dnbData = await response.json();
-            console.log(`✅ ${Object.keys(appState.dnbData).length} exercices DNB chargés`);
-        }
-    } catch (e) {
-        console.warn('⚠️ Impossible de charger dnb_data.json, essai avec les fichiers individuels');
+    // Utiliser dictionnaireDNB s'il est disponible
+    if (typeof dictionnaireDNB !== 'undefined') {
+        appState.dnbData = dictionnaireDNB;
+        console.log(`✅ ${Object.keys(appState.dnbData).length} exercices DNB chargés depuis dictionnaireDNB`);
+    } else {
+        console.error('❌ dictionnaireDNB non disponible');
     }
 }
 
