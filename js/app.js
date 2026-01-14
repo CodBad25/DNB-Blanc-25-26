@@ -7569,9 +7569,9 @@ async function loadBB1Exercises() {
                 "4": {
                     totalPoints: 4,
                     dnbId: "dnb_2017_11_ameriquesud_6",
-                    questionPoints: { q0: 1, q1: 1, q2: 1, q3: 1 },
+                    questionPoints: { q0: 1, q1: 1, q2: 1, q3: 1, q4: 0 },
                     questionCompetences: {
-                        q0: ["Modéliser"], q1: ["Modéliser"], q2: ["Modéliser"], q3: ["Modéliser"]
+                        q0: ["Modéliser"], q1: ["Modéliser"], q2: ["Modéliser"], q3: ["Modéliser"], q4: []
                     },
                     questionCompetencePoints: {
                         q0: { "Modéliser": 1 }, q1: { "Modéliser": 1 }, q2: { "Modéliser": 1 }, q3: { "Modéliser": 1 }
