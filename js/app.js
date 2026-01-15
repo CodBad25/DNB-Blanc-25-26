@@ -7044,22 +7044,43 @@ function updateOverviewIfVisible() {
 
 // === SAUVEGARDE ===
 function saveData() {
-    const dataToSave = {
-        appState: appState,
-        exercisesData: exercisesData
-    };
-    // Note: localStorage n'est pas disponible dans cet environnement
-    // La sauvegarde se ferait normalement ici
-    console.log('Données sauvegardées:', dataToSave);
-    
+    try {
+        const dataToSave = {
+            scores: appState.scores,
+            quickButtonStates: appState.quickButtonStates,
+            candidateComments: appState.candidateComments,
+            validatedCandidates: appState.validatedCandidates,
+            currentCandidateIndex: appState.currentCandidateIndex,
+            currentExerciseIndex: appState.currentExerciseIndex,
+            activeCandidates: appState.activeCandidates
+        };
+        localStorage.setItem('dnb_correction_data', JSON.stringify(dataToSave));
+        console.log('✅ Données sauvegardées');
+    } catch (e) {
+        console.error('❌ Erreur sauvegarde:', e);
+    }
+
     // Mettre à jour la vue d'ensemble après chaque sauvegarde
     updateOverviewIfVisible();
 }
 
 function loadData() {
-    // Note: localStorage n'est pas disponible dans cet environnement
-    // Le chargement se ferait normalement ici
-    console.log('Chargement des données...');
+    try {
+        const saved = localStorage.getItem('dnb_correction_data');
+        if (saved) {
+            const data = JSON.parse(saved);
+            appState.scores = data.scores || {};
+            appState.quickButtonStates = data.quickButtonStates || {};
+            appState.candidateComments = data.candidateComments || {};
+            appState.validatedCandidates = data.validatedCandidates || [];
+            appState.currentCandidateIndex = data.currentCandidateIndex || 0;
+            appState.currentExerciseIndex = data.currentExerciseIndex || 1;
+            appState.activeCandidates = data.activeCandidates || [];
+            console.log('✅ Données chargées:', data);
+        }
+    } catch (e) {
+        console.error('❌ Erreur chargement:', e);
+    }
 }
 
 // === OUTILS DE TEST ET ANIMATIONS ===
