@@ -1526,11 +1526,24 @@
             text-align: center;
         }
 
+        .validation-body-row {
+            display: flex;
+            gap: 15px;
+            padding: 10px 15px;
+            align-items: flex-start;
+        }
+
         .main-score-container {
-            padding: 8px 15px;
+            padding: 15px 20px;
             text-align: center;
-            background: white;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
             flex-shrink: 0;
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .main-score-badge {
@@ -1556,8 +1569,7 @@
         }
 
         .competences-table-container {
-            padding: 0 15px;
-            margin-bottom: 10px;
+            padding: 0;
             flex: 1;
             overflow-y: auto;
             min-height: 0;
@@ -1581,7 +1593,7 @@
         }
 
         .competences-table th {
-            padding: 8px 10px;
+            padding: 6px 8px;
             text-align: left;
             font-weight: 600;
             color: #495057;
@@ -1589,22 +1601,26 @@
             font-size: 0.85em;
         }
 
-        .competences-table th:nth-child(2) {
-            text-align: center;
-            width: 70px;
+        .competences-table th:nth-child(1) {
+            width: 130px;
         }
 
-        .competences-table th:nth-child(3) {
+        .competences-table th:nth-child(2) {
             text-align: center;
             width: 60px;
         }
 
+        .competences-table th:nth-child(3) {
+            text-align: center;
+            width: 55px;
+        }
+
         .competences-table th:nth-child(4) {
-            width: 160px;
+            width: 120px;
         }
 
         .competences-table td {
-            padding: 8px 10px;
+            padding: 6px 8px;
             border-bottom: 1px solid #f1f3f4;
         }
 
