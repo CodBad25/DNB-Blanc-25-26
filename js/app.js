@@ -7795,6 +7795,9 @@ async function loadBB1Exercises() {
         // Appliquer le barème BB1
         appState.baremeConfig = bb1Config.baremeConfig;
 
+        // ✅ CRUCIAL: Appliquer les compétences du barème aux exercices
+        applyBaremeCompetencesToExercisesData();
+
         // Vérifier si on doit aller directement à la correction
         const urlParams = new URLSearchParams(window.location.search);
         const isDirectMode = urlParams.get('direct') === 'true';
