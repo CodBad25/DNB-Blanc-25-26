@@ -1414,7 +1414,7 @@ function createFinalExercisesData() {
                     const answer = corrItem ? (typeof corrItem === 'object' ? corrItem.content : corrItem) : "Correction à venir";
 
                     return {
-                        id: `q${qIndex + 1}`,
+                        id: `q${qIndex}`,  // ✅ Utiliser qIndex (q0, q1, q2) pour correspondre au barème
                         title: questionTitle,
                         points: 1,
                         statement: statement,
