@@ -4895,18 +4895,8 @@ function autoNavigateAfterQuickButton() {
             // Passer à l'exercice suivant pour le même candidat
             nextExercise();
         } else {
-            // Dernier exercice : candidat terminé, proposer validation
-            const candidate = appState.activeCandidates[appState.currentCandidateIndex];
-            if (confirm('🎉 Candidat terminé ! Voulez-vous valider la correction maintenant ?')) {
-                validateCorrection();
-            } else {
-                // Passer au candidat suivant, exercice 1
-                if (appState.currentCandidateIndex < appState.activeCandidates.length - 1) {
-                    appState.currentExerciseIndex = 1;
-                    nextCandidate();
-                    showTab('exercise1');
-                }
-            }
+            // Dernier exercice : candidat terminé, ouvrir directement la validation
+            validateCorrection();
         }
     }
 }
