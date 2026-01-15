@@ -6106,14 +6106,15 @@ function renderCandidatesOverview() {
             mainScoreClass = 'in-progress';
         }
         
-        // Génération des scores par exercice avec couleurs et noms
-        const exerciseNames = ['🎲', '📐', '☐', '💻', '📈']; // Icônes des exercices
+        // Génération des scores par exercice avec couleurs et icônes dynamiques
         const exerciseScoresHtml = details.exerciseScores.map((ex, index) => {
             const scoreColor = getExerciseScoreColor(ex, ex.exerciseNumber, candidate.number);
-            
+            const exercise = exercisesData[ex.exerciseNumber];
+            const displayInfo = exercise ? getExerciseDisplayInfo(exercise) : { icon: '📝' };
+
             return `
                 <div class="exercise-score-container">
-                    <div class="exercise-icon">${exerciseNames[index]}</div>
+                    <div class="exercise-icon">${displayInfo.icon}</div>
                     <div class="exercise-score" style="background: ${scoreColor} !important; color: white !important;">${ex.score}/${ex.maxScore}</div>
                 </div>
             `;
