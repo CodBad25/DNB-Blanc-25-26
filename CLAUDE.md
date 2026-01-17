@@ -63,6 +63,52 @@ Quand un correcteur charge un pack :
 Le mode test JSON (sélecteur "Parsing temps réel / JSON pré-générés") est désactivé en production.
 Pour le réactiver : mettre `enabled: true` dans `JSON_SOURCE` (ligne 13).
 
+### 7. Page d'accueil BB1 simplifiée (15 janvier 2026)
+**Fichier** : `index.html`
+
+Nouvelle page d'accueil dédiée au DNB Blanc n°1 avec :
+- Design moderne (gradient vert/bleu)
+- Aperçu des 5 exercices avec emojis (🏃 Course, 🍬 Bonbons, 🌍 CO2, 🐱 Scratch, 🚗 Trajet)
+- Stats affichées : 5 exercices, 20 points, 16 questions
+- **Bouton principal** : "Commencer la correction" → accès direct sans passer par le barème
+- **Boutons secondaires** : "Voir le barème" et "Créer un sujet"
+
+Configuration BB1 intégrée dans `index.html` (variable `bb1Config`) avec barème complet pré-configuré.
+
+### 8. Modale de validation améliorée (15 janvier 2026)
+**Fichiers** : `app.html` (ligne ~1071), `css/main.css` (ligne ~1529), `js/app.js` (ligne ~6594)
+
+Améliorations UX de la modale de validation :
+- **Score à GAUCHE** du tableau des compétences (propriété CSS `order: -1`)
+- **Score agrandi** : font-size 2.2em, padding 15px 25px
+- **Couleurs selon le niveau de maîtrise** (classes CSS) :
+  - `.tbm` (≥15/20) : Vert - Très bonne maîtrise
+  - `.ms` (≥10/20) : Bleu - Maîtrise satisfaisante
+  - `.mf` (≥5/20) : Orange - Maîtrise fragile
+  - `.mi` (<5/20) : Rouge - Maîtrise insuffisante
+- **Boutons agrandis** : padding 12px 24px, font-size 1.05em
+
+### 9. Corrections de bugs (14-15 janvier 2026)
+**Fichier** : `js/app.js`
+
+- **Compétences qui n'apparaissaient pas** : Ajout de l'appel à `applyBaremeCompetencesToExercisesData()` dans `loadBB1Exercises()`
+- **Scores incorrects (5/3.5 au lieu de 6/4/3/4/3)** : Correction des IDs de questions (`q${qIndex}` au lieu de `q${qIndex + 1}`)
+- **Données perdues au refresh** : Implémentation réelle de `saveData()` et `loadData()` avec localStorage
+- **Icônes incorrectes sur les cartes candidats** : Utilisation de `getExerciseDisplayInfo(exercise).icon` au lieu d'icônes hardcodées
+
+### 10. Constante BB1_EXERCISES
+**Fichier** : `js/app.js` (début du fichier)
+
+```javascript
+const BB1_EXERCISES = {
+    'dnb_2017_12_wallisfutuna_7': { title: 'Course', icon: '🏃', intro: '...' },
+    'dnb_2016_04_pondichery_3': { title: 'Bonbons', icon: '🍬', intro: '...' },
+    'dnb_2019_06_asie_2': { title: 'CO2', icon: '🌍', intro: '...' },
+    'dnb_2017_11_ameriquesud_6': { title: 'Scratch', icon: '🐱', intro: '...' },
+    'dnb_2019_11_ameriquesud_5': { title: 'Trajet', icon: '🚗', intro: '...' }
+};
+```
+
 ## Structure des fichiers principaux
 
 ```
@@ -126,3 +172,9 @@ Les modifications sont automatiquement déployées sur Netlify à chaque push su
 - [ ] Permettre de modifier un pack existant
 - [ ] Ajouter un système de versioning des packs
 - [ ] Synchronisation des corrections entre correcteurs (cloud)
+
+## En cours / À vérifier
+
+- [ ] **Vérifier que le score s'affiche bien à GAUCHE** dans la modale de validation après hard refresh
+  - CSS modifié : `order: -1` sur `.main-score-container`, `order: 1` sur `.competences-table-container`
+  - Version CSS : `v=20260115002`

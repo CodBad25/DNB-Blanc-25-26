@@ -6091,16 +6091,9 @@ function renderCandidatesOverview() {
             mainScoreClass = 'not-started';
         } else if (details.status === 'completed') {
             mainScoreText = `${details.noteOn20}/20`;
-            // Niveaux de maîtrise selon la note sur 20 (barème DNB 2025)
-            if (details.noteOn20 >= 15) {
-                mainScoreClass = details.isValidated ? 'validated tbm' : 'tbm'; // Très bonne maîtrise (≥15/20)
-            } else if (details.noteOn20 >= 10) {
-                mainScoreClass = details.isValidated ? 'validated ms' : 'ms'; // Maîtrise satisfaisante (≥10/20)
-            } else if (details.noteOn20 >= 5) {
-                mainScoreClass = details.isValidated ? 'validated mf' : 'mf'; // Maîtrise fragile (≥5/20)
-            } else {
-                mainScoreClass = details.isValidated ? 'validated mi' : 'mi'; // Maîtrise insuffisante (<5/20)
-            }
+            // Niveaux de maîtrise selon les seuils configurables
+            const masteryClass = getMasteryClass(details.noteOn20);
+            mainScoreClass = details.isValidated ? `validated ${masteryClass}` : masteryClass;
         } else {
             mainScoreText = `${details.totalScore}/${details.maxScore}`;
             mainScoreClass = 'in-progress';
@@ -6591,18 +6584,10 @@ function validateCorrection() {
     document.getElementById('validationCandidateNumber').textContent = candidate.number;
     document.getElementById('validationMainScore').textContent = `${details.noteOn20}/20`;
 
-    // Appliquer la couleur selon le niveau de maîtrise (barème DNB 2025)
+    // Appliquer la couleur selon les seuils de maîtrise configurables
     const mainScoreElement = document.getElementById('validationMainScore');
     mainScoreElement.className = 'main-score-badge'; // Reset toutes les classes
-    if (details.noteOn20 >= 15) {
-        mainScoreElement.classList.add('tbm'); // Très bonne maîtrise - Vert
-    } else if (details.noteOn20 >= 10) {
-        mainScoreElement.classList.add('ms'); // Maîtrise satisfaisante - Bleu
-    } else if (details.noteOn20 >= 5) {
-        mainScoreElement.classList.add('mf'); // Maîtrise fragile - Orange
-    } else {
-        mainScoreElement.classList.add('mi'); // Maîtrise insuffisante - Rouge
-    }
+    mainScoreElement.classList.add(getMasteryClass(details.noteOn20));
     
     if (details.nrCount > 0) {
         document.getElementById('validationNR').textContent = ` • ${details.nrCount} question${details.nrCount > 1 ? 's' : ''} non rendue${details.nrCount > 1 ? 's' : ''}`;
@@ -7608,7 +7593,139 @@ function showAdminTab(tabName) {
     // Activer l'onglet sélectionné
     document.querySelector(`[onclick="showAdminTab('${tabName}')"]`).classList.add('active');
     document.getElementById(`admin${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`).classList.add('active');
+
+    // Si on affiche l'onglet maîtrise, initialiser les valeurs
+    if (tabName === 'maitrise') {
+        initMaitriseTab();
+    }
 }
+
+// ========== GESTION DES SEUILS DE MAÎTRISE ==========
+
+// Initialiser l'onglet maîtrise avec les valeurs actuelles
+function initMaitriseTab() {
+    // Charger les seuils depuis localStorage ou utiliser les valeurs par défaut
+    loadMaitriseSeuils();
+
+    // Mettre à jour les inputs
+    document.getElementById('seuilTBM').value = appState.maitriseSeuils.tbm;
+    document.getElementById('seuilMS').value = appState.maitriseSeuils.ms;
+    document.getElementById('seuilMF').value = appState.maitriseSeuils.mf;
+    document.getElementById('seuilMI').textContent = appState.maitriseSeuils.mf;
+
+    // Mettre à jour l'aperçu
+    updateMaitrisePreview();
+}
+
+// Charger les seuils depuis localStorage
+function loadMaitriseSeuils() {
+    const saved = localStorage.getItem('dnb_maitrise_seuils');
+    if (saved) {
+        try {
+            const seuils = JSON.parse(saved);
+            appState.maitriseSeuils = {
+                tbm: seuils.tbm ?? 15,
+                ms: seuils.ms ?? 10,
+                mf: seuils.mf ?? 5
+            };
+        } catch (e) {
+            console.warn('Erreur chargement seuils maîtrise:', e);
+        }
+    }
+}
+
+// Mettre à jour les seuils quand l'utilisateur modifie les inputs
+function updateMaitriseSeuils() {
+    const tbm = parseFloat(document.getElementById('seuilTBM').value) || 15;
+    const ms = parseFloat(document.getElementById('seuilMS').value) || 10;
+    const mf = parseFloat(document.getElementById('seuilMF').value) || 5;
+
+    // Validation : TBM > MS > MF
+    if (tbm <= ms) {
+        alert('Le seuil TBM doit être supérieur au seuil MS');
+        document.getElementById('seuilTBM').value = appState.maitriseSeuils.tbm;
+        return;
+    }
+    if (ms <= mf) {
+        alert('Le seuil MS doit être supérieur au seuil MF');
+        document.getElementById('seuilMS').value = appState.maitriseSeuils.ms;
+        return;
+    }
+
+    appState.maitriseSeuils.tbm = tbm;
+    appState.maitriseSeuils.ms = ms;
+    appState.maitriseSeuils.mf = mf;
+
+    // Mettre à jour l'affichage du seuil MI
+    document.getElementById('seuilMI').textContent = mf;
+
+    // Mettre à jour l'aperçu
+    updateMaitrisePreview();
+}
+
+// Mettre à jour l'aperçu des plages
+function updateMaitrisePreview() {
+    const { tbm, ms, mf } = appState.maitriseSeuils;
+    const preview = document.getElementById('maitrisePreview');
+
+    preview.innerHTML = `
+        <div style="padding: 8px 12px; background: linear-gradient(135deg, #28a745, #20c997); color: white; border-radius: 6px; font-size: 0.9em;">
+            <strong>TBM</strong>: ${tbm} - 20
+        </div>
+        <div style="padding: 8px 12px; background: linear-gradient(135deg, #17a2b8, #007bff); color: white; border-radius: 6px; font-size: 0.9em;">
+            <strong>MS</strong>: ${ms} - ${tbm - 0.5}
+        </div>
+        <div style="padding: 8px 12px; background: linear-gradient(135deg, #ffc107, #fd7e14); color: white; border-radius: 6px; font-size: 0.9em;">
+            <strong>MF</strong>: ${mf} - ${ms - 0.5}
+        </div>
+        <div style="padding: 8px 12px; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border-radius: 6px; font-size: 0.9em;">
+            <strong>MI</strong>: 0 - ${mf - 0.5}
+        </div>
+    `;
+}
+
+// Sauvegarder les seuils dans localStorage
+function saveMaitriseSeuils() {
+    localStorage.setItem('dnb_maitrise_seuils', JSON.stringify(appState.maitriseSeuils));
+    alert('✅ Seuils de maîtrise sauvegardés !');
+    console.log('💾 Seuils maîtrise sauvegardés:', appState.maitriseSeuils);
+}
+
+// Réinitialiser les seuils par défaut
+function resetMaitriseSeuils() {
+    if (!confirm('Réinitialiser les seuils aux valeurs par défaut ?\n\nTBM ≥ 15\nMS ≥ 10\nMF ≥ 5\nMI < 5')) {
+        return;
+    }
+
+    appState.maitriseSeuils = { tbm: 15, ms: 10, mf: 5 };
+    localStorage.removeItem('dnb_maitrise_seuils');
+
+    // Mettre à jour les inputs
+    document.getElementById('seuilTBM').value = 15;
+    document.getElementById('seuilMS').value = 10;
+    document.getElementById('seuilMF').value = 5;
+    document.getElementById('seuilMI').textContent = 5;
+
+    updateMaitrisePreview();
+    alert('🔄 Seuils réinitialisés aux valeurs par défaut');
+}
+
+// Fonction helper pour obtenir la classe de maîtrise selon la note
+function getMasteryClass(noteOn20) {
+    const { tbm, ms, mf } = appState.maitriseSeuils;
+
+    if (noteOn20 >= tbm) {
+        return 'tbm'; // Très bonne maîtrise
+    } else if (noteOn20 >= ms) {
+        return 'ms';  // Maîtrise satisfaisante
+    } else if (noteOn20 >= mf) {
+        return 'mf';  // Maîtrise fragile
+    } else {
+        return 'mi';  // Maîtrise insuffisante
+    }
+}
+
+// ========== FIN GESTION SEUILS MAÎTRISE ==========
 
 // Afficher un exercice dans l'onglet barème
 function showAdminExercise(exerciseNumber) {
@@ -7866,6 +7983,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedBaremeMode = localStorage.getItem('dnb_bareme_mode') || 'b';
     appState.baremeConfig.mode = savedBaremeMode;
     console.log(`🎛️ Mode barème chargé: ${savedBaremeMode.toUpperCase()}`);
+
+    // Charger les seuils de maîtrise depuis localStorage
+    loadMaitriseSeuils();
+    console.log(`🎯 Seuils maîtrise chargés: TBM≥${appState.maitriseSeuils.tbm}, MS≥${appState.maitriseSeuils.ms}, MF≥${appState.maitriseSeuils.mf}`);
 
     // 🎓 Initialiser MathALÉA si sélectionné
     if (typeof window.initMathaleaPage === 'function') {

@@ -30,6 +30,13 @@ var appState = {
         mode: 'b', // 'a' = points par compétence, 'b' = répartition auto, 'c' = total uniquement
         totalMax: 20, // DNB 2025 sur 20 points (Ex1: 6pts + Ex2-5: 14pts)
         exercises: {} // exerciseId: { totalPoints, selectedCompetences, pointsPerCompetence }
+    },
+    // Seuils des niveaux de maîtrise (sur 20)
+    maitriseSeuils: {
+        tbm: 15,  // Très bonne maîtrise : note >= 15
+        ms: 10,   // Maîtrise satisfaisante : note >= 10
+        mf: 5     // Maîtrise fragile : note >= 5
+        // MI (Maîtrise insuffisante) : note < mf
     }
 };
 

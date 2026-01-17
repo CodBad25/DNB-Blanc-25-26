@@ -878,6 +878,10 @@
                     <span class="admin-tab-icon">📝</span>
                     <span>Barème</span>
                 </button>
+                <button class="admin-tab" onclick="showAdminTab('maitrise')">
+                    <span class="admin-tab-icon">🎯</span>
+                    <span>Niveaux de maîtrise</span>
+                </button>
                 <button class="admin-tab" onclick="showAdminTab('test')">
                     <span class="admin-tab-icon">🧪</span>
                     <span>Outils de test</span>
@@ -943,6 +947,93 @@
                             </button>
                             <input type="file" id="importBaremeInput" accept=".json" style="display: none;" onchange="handleBaremeImport(event)">
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sous-onglet Niveaux de maîtrise -->
+            <div class="admin-tab-content" id="adminMaitriseTab">
+                <div class="admin-section">
+                    <div class="admin-section-title">🎯 Configuration des niveaux de maîtrise</div>
+
+                    <div style="background: #e8f5e9; padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #4caf50;">
+                        <strong>ℹ️ Barème DNB :</strong> Les niveaux de maîtrise déterminent l'appréciation finale selon la note sur 20 points.
+                    </div>
+
+                    <div class="maitrise-levels-config" style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- TBM - Très bonne maîtrise -->
+                        <div class="maitrise-level-row" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: linear-gradient(135deg, #28a745, #20c997); border-radius: 10px; color: white;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; font-size: 1.1em;">Très bonne maîtrise (TBM)</div>
+                                <div style="opacity: 0.9; font-size: 0.9em;">L'élève maîtrise parfaitement les compétences</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>Note ≥</span>
+                                <input type="number" id="seuilTBM" value="15" min="0" max="20" step="0.5"
+                                       style="width: 70px; padding: 8px; border: none; border-radius: 6px; font-size: 1.1em; font-weight: bold; text-align: center;"
+                                       onchange="updateMaitriseSeuils()">
+                                <span>/ 20</span>
+                            </div>
+                        </div>
+
+                        <!-- MS - Maîtrise satisfaisante -->
+                        <div class="maitrise-level-row" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: linear-gradient(135deg, #17a2b8, #007bff); border-radius: 10px; color: white;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; font-size: 1.1em;">Maîtrise satisfaisante (MS)</div>
+                                <div style="opacity: 0.9; font-size: 0.9em;">L'élève maîtrise les compétences de manière satisfaisante</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>Note ≥</span>
+                                <input type="number" id="seuilMS" value="10" min="0" max="20" step="0.5"
+                                       style="width: 70px; padding: 8px; border: none; border-radius: 6px; font-size: 1.1em; font-weight: bold; text-align: center;"
+                                       onchange="updateMaitriseSeuils()">
+                                <span>/ 20</span>
+                            </div>
+                        </div>
+
+                        <!-- MF - Maîtrise fragile -->
+                        <div class="maitrise-level-row" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: linear-gradient(135deg, #ffc107, #fd7e14); border-radius: 10px; color: white;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; font-size: 1.1em;">Maîtrise fragile (MF)</div>
+                                <div style="opacity: 0.9; font-size: 0.9em;">L'élève a des difficultés mais possède quelques acquis</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>Note ≥</span>
+                                <input type="number" id="seuilMF" value="5" min="0" max="20" step="0.5"
+                                       style="width: 70px; padding: 8px; border: none; border-radius: 6px; font-size: 1.1em; font-weight: bold; text-align: center;"
+                                       onchange="updateMaitriseSeuils()">
+                                <span>/ 20</span>
+                            </div>
+                        </div>
+
+                        <!-- MI - Maîtrise insuffisante -->
+                        <div class="maitrise-level-row" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: linear-gradient(135deg, #dc3545, #c82333); border-radius: 10px; color: white;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; font-size: 1.1em;">Maîtrise insuffisante (MI)</div>
+                                <div style="opacity: 0.9; font-size: 0.9em;">L'élève ne maîtrise pas les compétences évaluées</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>Note <</span>
+                                <span id="seuilMI" style="width: 70px; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 6px; font-size: 1.1em; font-weight: bold; text-align: center;">5</span>
+                                <span>/ 20</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <div style="font-weight: bold; margin-bottom: 10px;">📊 Aperçu des plages :</div>
+                        <div id="maitrisePreview" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <!-- Généré dynamiquement -->
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button onclick="saveMaitriseSeuils()" style="flex: 1; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                            💾 Sauvegarder les seuils
+                        </button>
+                        <button onclick="resetMaitriseSeuils()" style="padding: 12px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            🔄 Réinitialiser
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1503,6 +1594,6 @@
     <script src="js/modules/packManager.js?v=20260114018"></script>
     <!-- Barèmes prédéfinis -->
     <script src="js/baremes/bb1_2025.js?v=20260114001"></script>
-    <script src="js/app.js?v=20260117001"></script>
+    <script src="js/app.js?v=20260117002"></script>
 </body>
 </html>
