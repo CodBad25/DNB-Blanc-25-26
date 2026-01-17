@@ -1607,6 +1607,111 @@
             font-weight: 500;
         }
 
+        /* === Grille NR visuelle par exercice === */
+        .nr-grid-container {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .nr-grid-title {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .nr-grid-exercise {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .nr-grid-exercise:last-child {
+            margin-bottom: 0;
+        }
+
+        .nr-grid-exercise-icon {
+            font-size: 1.1em;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nr-grid-exercise-name {
+            font-size: 0.8em;
+            font-weight: 500;
+            color: #495057;
+            width: 70px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nr-grid-questions {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .nr-grid-question {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            background: #dee2e6;
+            transition: all 0.2s ease;
+        }
+
+        .nr-grid-question.answered {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            box-shadow: 0 1px 3px rgba(40, 167, 69, 0.3);
+        }
+
+        .nr-grid-question.nr {
+            background: #adb5bd;
+        }
+
+        .nr-grid-count {
+            font-size: 0.75em;
+            font-weight: 600;
+            color: #6c757d;
+            min-width: 35px;
+            text-align: right;
+        }
+
+        .nr-grid-count.all-answered {
+            color: #28a745;
+        }
+
+        .nr-grid-total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .nr-grid-total-label {
+            color: #495057;
+        }
+
+        .nr-grid-total-value {
+            color: #28a745;
+        }
+
+        .nr-grid-total-value.has-nr {
+            color: #dc3545;
+        }
+
         .competences-table-container {
             order: 1; /* Force à droite du score */
             padding: 0;

@@ -6600,6 +6600,9 @@ function validateCorrection() {
     // Générer les grilles des exercices et compétences
     renderExercisesValidation(candidate.number);
     renderCompetencesValidation(competencesScores);
+
+    // Générer la grille visuelle NR par exercice
+    renderNRGrid(candidate.number);
     
     // Gérer l'affichage du bouton "candidat suivant"
     const btnValidateNext = document.getElementById('btnValidateNext');
@@ -6628,7 +6631,88 @@ function closeValidationModal() {
     document.getElementById('validationModal').classList.remove('active');
 }
 
+/**
+ * Génère la grille visuelle NR par exercice
+ * Affiche une ligne par exercice avec des carrés colorés pour chaque question
+ * Vert = répondu, Gris = NR (non rendu)
+ */
+function renderNRGrid(candidateNumber) {
+    const container = document.getElementById('nrGridContainer');
+    if (!container) return;
 
+    let totalAnswered = 0;
+    let totalQuestions = 0;
+    let html = '<div class="nr-grid-title">Questions par exercice</div>';
+
+    // Parcourir les exercices (1 à 5)
+    for (let exNum = 1; exNum <= 5; exNum++) {
+        const exKey = `exercise${exNum}`;
+        const exercise = exercisesData[exKey];
+
+        if (!exercise || !exercise.questions) continue;
+
+        // Obtenir les infos d'affichage de l'exercice (emoji, titre)
+        const displayInfo = getExerciseDisplayInfo(exercise);
+
+        let exerciseAnswered = 0;
+        const questionsHtml = [];
+
+        // Parcourir les questions de l'exercice
+        exercise.questions.forEach((question, qIndex) => {
+            const questionKey = `q${qIndex}`;
+
+            // Vérifier si la question est traitée
+            const quickState = appState.quickButtonStates[candidateNumber]?.[exKey]?.[questionKey];
+            const hasScores = appState.scores[candidateNumber]?.[exKey]?.[questionKey];
+
+            // Une question est considérée traitée si elle a un quick state OU des scores
+            const isAnswered = quickState || (hasScores && Object.keys(hasScores).length > 0);
+            const isNR = quickState === 'nr';
+
+            if (isAnswered && !isNR) {
+                exerciseAnswered++;
+            }
+
+            totalQuestions++;
+
+            // Classe CSS selon l'état
+            let stateClass = '';
+            if (isNR) {
+                stateClass = 'nr';
+            } else if (isAnswered) {
+                stateClass = 'answered';
+                totalAnswered++;
+            }
+
+            questionsHtml.push(`<div class="nr-grid-question ${stateClass}" title="Q${qIndex + 1}"></div>`);
+        });
+
+        const questionCount = exercise.questions.length;
+        const allAnswered = exerciseAnswered === questionCount;
+
+        html += `
+            <div class="nr-grid-exercise">
+                <span class="nr-grid-exercise-icon">${displayInfo.icon}</span>
+                <span class="nr-grid-exercise-name">${displayInfo.title}</span>
+                <div class="nr-grid-questions">
+                    ${questionsHtml.join('')}
+                </div>
+                <span class="nr-grid-count ${allAnswered ? 'all-answered' : ''}">${exerciseAnswered}/${questionCount}</span>
+            </div>
+        `;
+    }
+
+    // Total en bas
+    const allDone = totalAnswered === totalQuestions;
+    html += `
+        <div class="nr-grid-total">
+            <span class="nr-grid-total-label">Total</span>
+            <span class="nr-grid-total-value ${!allDone ? 'has-nr' : ''}">${totalAnswered}/${totalQuestions}</span>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
 
 function calculateCompetencesScores(candidateNumber) {
     const competencesData = {
