@@ -6644,12 +6644,10 @@ function renderNRGrid(candidateNumber) {
     let totalQuestions = 0;
     let html = '<div class="nr-grid-title">Questions par exercice</div>';
 
-    // Parcourir les exercices (1 à 5)
-    for (let exNum = 1; exNum <= 5; exNum++) {
-        const exKey = `exercise${exNum}`;
+    // Parcourir les exercices (utiliser Object.keys comme les autres fonctions)
+    Object.keys(exercisesData).forEach(exKey => {
         const exercise = exercisesData[exKey];
-
-        if (!exercise || !exercise.questions) continue;
+        if (!exercise || !exercise.questions) return;
 
         // Obtenir les infos d'affichage de l'exercice (emoji, titre)
         const displayInfo = getExerciseDisplayInfo(exercise);
@@ -6700,7 +6698,7 @@ function renderNRGrid(candidateNumber) {
                 <span class="nr-grid-count ${allAnswered ? 'all-answered' : ''}">${exerciseAnswered}/${questionCount}</span>
             </div>
         `;
-    }
+    });
 
     // Total en bas
     const allDone = totalAnswered === totalQuestions;
