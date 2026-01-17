@@ -4663,11 +4663,11 @@ function toggleCompetenceScore(exerciseNumber, questionId, competenceName, maxPo
     const question = exercisesData[exerciseNumber].questions.find(q => q.id === questionId);
     const competence = question.competences.find(c => c.name === competenceName);
 
-    // 🎯 Gestion de la compétence "en cours" pour les compétences 2+ points
+    // 🎯 Gestion de la compétence "en cours" pour les compétences avec score partiel possible
     const competenceKey = `${candidate.number}_${exerciseNumber}_${questionId}_${competenceName}`;
 
-    // Si on clique sur une compétence multi-points, elle devient "en cours"
-    if (competence.points > 1) {
+    // Si on clique sur une compétence avec plusieurs incréments possibles, elle devient "en cours"
+    if (competence.points >= 1) {
         currentlyEditingCompetence = competenceKey;
     }
 
@@ -4689,7 +4689,7 @@ function toggleCompetenceScore(exerciseNumber, questionId, competenceName, maxPo
     if (setToZero) {
         newScore = 0;
         // Si on met à 0 via appui long, la compétence n'est plus "en cours"
-        if (competence.points > 1 && currentlyEditingCompetence === competenceKey) {
+        if (competence.points >= 1 && currentlyEditingCompetence === competenceKey) {
             currentlyEditingCompetence = null;
         }
     } else {
@@ -4700,17 +4700,17 @@ function toggleCompetenceScore(exerciseNumber, questionId, competenceName, maxPo
         // ✅ CORRECTION 2 : Système de clics incrémentiels - Si on dépasse le max, retour à 0
         if (newScore > competence.points) {
             newScore = 0;
-            // Si on remet à 0 une compétence multi-points, elle n'est plus "en cours"
-            if (competence.points > 1 && currentlyEditingCompetence === competenceKey) {
+            // Si on remet à 0 une compétence avec score partiel, elle n'est plus "en cours"
+            if (competence.points >= 1 && currentlyEditingCompetence === competenceKey) {
                 currentlyEditingCompetence = null;
             }
         }
     }
 
     appState.scores[candidate.number][exerciseNumber][questionId].competences[competenceName] = newScore;
-    
-    // Si on atteint le score maximum pour une compétence multi-points, elle n'est plus "en cours"
-    if (newScore === competence.points && competence.points > 1) {
+
+    // Si on atteint le score maximum pour une compétence avec score partiel, elle n'est plus "en cours"
+    if (newScore === competence.points && competence.points >= 1) {
         currentlyEditingCompetence = null;
     }
 
@@ -6593,15 +6593,15 @@ function validateCorrection() {
 
     // Appliquer la couleur selon le niveau de maîtrise (barème DNB 2025)
     const mainScoreElement = document.getElementById('validationMainScore');
-    mainScoreElement.className = 'main-score-badge';
+    mainScoreElement.className = 'main-score-badge'; // Reset toutes les classes
     if (details.noteOn20 >= 15) {
-        mainScoreElement.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+        mainScoreElement.classList.add('tbm'); // Très bonne maîtrise - Vert
     } else if (details.noteOn20 >= 10) {
-        mainScoreElement.style.background = 'linear-gradient(135deg, #17a2b8, #007bff)';
+        mainScoreElement.classList.add('ms'); // Maîtrise satisfaisante - Bleu
     } else if (details.noteOn20 >= 5) {
-        mainScoreElement.style.background = 'linear-gradient(135deg, #ffc107, #fd7e14)';
+        mainScoreElement.classList.add('mf'); // Maîtrise fragile - Orange
     } else {
-        mainScoreElement.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+        mainScoreElement.classList.add('mi'); // Maîtrise insuffisante - Rouge
     }
     
     if (details.nrCount > 0) {
@@ -8081,29 +8081,20 @@ function getCompetenceProgressState(candidateNumber, exerciseNumber, questionId,
     }
     
     const currentScore = getCandidateCompetenceScore(candidateNumber, exerciseNumber, questionId, competenceName);
-    
-    // 🎯 Pour les compétences à 1 point : toujours terminé une fois cliquée
-    if (competence.points === 1) {
-        if (currentScore === 1) {
-            return 'perfect'; // Score maximal
-        } else {
-            return 'completed'; // Touchée mais pas de point (décision du correcteur)
-        }
-    }
-    
-    // 🎯 Pour les compétences multi-points (2+ pts) : nouvelle logique
+
+    // 🎯 Pour toutes les compétences (1pt et plus) : logique unifiée avec "en cours"
     const competenceKey = `${candidateNumber}_${exerciseNumber}_${questionId}_${competenceName}`;
-    
+
     // Si cette compétence est actuellement en cours d'édition
     if (currentlyEditingCompetence === competenceKey) {
         if (currentScore === competence.points) {
             return 'perfect'; // Score maximal atteint
         } else {
-            return 'in-progress'; // En cours de correction
+            return 'in-progress'; // En cours de correction (bloque la navigation auto)
         }
     }
-    
-    // Si une autre compétence est en cours, celle-ci est terminée
+
+    // Si une autre compétence est en cours (ou aucune), celle-ci est terminée
     if (currentScore === competence.points) {
         return 'perfect'; // Score maximal
     } else {
