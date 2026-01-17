@@ -33,15 +33,18 @@
 
 html {
     overflow-x: hidden;
+    overflow-y: auto;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--gray-100);
     min-height: 100vh;
-    overflow-x: hidden;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Animation keyframes */
@@ -55,6 +58,7 @@ body {
     max-width: 100%;
     margin: 0;
     overflow-x: hidden;
+    overflow-y: visible;
 }
 
 /* === HEADER COMPACT === */
@@ -190,15 +194,39 @@ body {
     padding: 12px 20px 20px;
     max-width: 1400px;
     margin: 0 auto;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .tab-panel {
     display: none;
     animation: fadeIn 0.2s ease;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .tab-panel.active {
     display: block;
+}
+
+/* Fix grid/flex overflow */
+.stats-grid,
+.charts-row,
+.exercise-detail-grid,
+.recommendation-grid {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.stats-grid > *,
+.charts-row > *,
+.exercise-detail-grid > *,
+.recommendation-grid > * {
+    min-width: 0;
+    overflow: hidden;
 }
 
 @keyframes fadeIn {

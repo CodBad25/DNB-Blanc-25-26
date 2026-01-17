@@ -18,6 +18,11 @@ const bilansState = {
 
 // === INITIALISATION ===
 document.addEventListener('DOMContentLoaded', () => {
+    // Fix Retina display blur for Chart.js
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.devicePixelRatio = window.devicePixelRatio || 2;
+    }
+
     initDropzoneJSON();
     initDropzone();
     loadExistingData();
@@ -1704,8 +1709,8 @@ function closeIndividualModal() {
     document.getElementById('individualModal').classList.remove('active');
 }
 
-// === BILAN CLASSE PDF ===
-function generateClassPDF() {
+// === BILAN CLASSE PDF AVEC PDFMAKE ===
+async function generateClassPDF() {
     const candidats = filterByClass(getCorrectedCandidates());
 
     if (candidats.length === 0) {
@@ -1713,155 +1718,515 @@ function generateClassPDF() {
         return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-
     const className = bilansState.selectedClass === 'all' ? 'Toutes classes' : bilansState.selectedClass;
 
-    // === HEADER AVEC BANDEAU COLORÉ ===
-    // Gradient simulé avec rectangles
-    doc.setFillColor(102, 126, 234);
-    doc.rect(0, 0, pageWidth, 35, 'F');
-    doc.setFillColor(118, 75, 162);
-    doc.rect(0, 30, pageWidth, 8, 'F');
-
-    // Titre dans le header
-    doc.setFontSize(22);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont(undefined, 'bold');
-    doc.text('DNB Blanc - Mathématiques', pageWidth / 2, 16, { align: 'center' });
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    doc.text('Décembre 2025', pageWidth / 2, 26, { align: 'center' });
-
-    // === SOUS-TITRE CLASSE ===
-    doc.setFontSize(16);
-    doc.setTextColor(55, 65, 81);
-    doc.setFont(undefined, 'bold');
-    doc.text(`Bilan de classe : ${className}`, pageWidth / 2, 50, { align: 'center' });
-
-    // === STATISTIQUES ===
+    // Calculer les statistiques
     const notes = candidats.map(c => c.note).sort((a, b) => a - b);
-    const moyenne = (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(1);
-    const mediane = notes.length % 2 === 0
-        ? ((notes[notes.length / 2 - 1] + notes[notes.length / 2]) / 2).toFixed(1)
-        : notes[Math.floor(notes.length / 2)].toFixed(1);
+    const n = notes.length;
+    const moyenne = (notes.reduce((a, b) => a + b, 0) / n).toFixed(2);
+    const mediane = n % 2 === 0
+        ? ((notes[Math.floor(n/2) - 1] + notes[Math.floor(n/2)]) / 2).toFixed(2)
+        : notes[Math.floor(n/2)].toFixed(2);
     const min = Math.min(...notes).toFixed(1);
     const max = Math.max(...notes).toFixed(1);
+    const q1 = notes[Math.floor(n * 0.25)].toFixed(2);
+    const q3 = notes[Math.floor(n * 0.75)].toFixed(2);
 
-    const tbm = candidats.filter(c => c.niveau === 'TBM').length;
-    const ms = candidats.filter(c => c.niveau === 'MS').length;
-    const mf = candidats.filter(c => c.niveau === 'MF').length;
-    const mi = candidats.filter(c => c.niveau === 'MI').length;
+    // Répartition par tranches (sur 20)
+    const tranches = [
+        { label: '0 à 5', min: 0, max: 5, color: '#dc2626' },
+        { label: '5 à 10', min: 5, max: 10, color: '#ea580c' },
+        { label: '10 à 15', min: 10, max: 15, color: '#ca8a04' },
+        { label: '15 à 20', min: 15, max: 20, color: '#16a34a' }
+    ];
 
-    // Boîte statistiques
-    doc.setFillColor(249, 250, 251);
-    doc.setDrawColor(229, 231, 235);
-    doc.roundedRect(15, 55, pageWidth - 30, 28, 3, 3, 'FD');
-
-    doc.setFontSize(10);
-    doc.setTextColor(107, 114, 128);
-    doc.setFont(undefined, 'normal');
-
-    // Ligne 1 : Stats générales
-    const statsY = 65;
-    doc.text(`Effectif: ${candidats.length}`, 25, statsY);
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(59, 130, 246);
-    doc.text(`Moyenne: ${moyenne}/20`, 60, statsY);
-    doc.setTextColor(34, 197, 94);
-    doc.text(`Médiane: ${mediane}/20`, 105, statsY);
-    doc.setTextColor(107, 114, 128);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Min: ${min}`, 150, statsY);
-    doc.text(`Max: ${max}`, 175, statsY);
-
-    // Ligne 2 : Répartition niveaux avec couleurs
-    const niveauY = 76;
-    doc.setFont(undefined, 'bold');
-    doc.setTextColor(34, 197, 94); // Vert TBM
-    doc.text(`TBM: ${tbm} (${Math.round(tbm/candidats.length*100)}%)`, 25, niveauY);
-    doc.setTextColor(59, 130, 246); // Bleu MS
-    doc.text(`MS: ${ms} (${Math.round(ms/candidats.length*100)}%)`, 70, niveauY);
-    doc.setTextColor(245, 158, 11); // Orange MF
-    doc.text(`MF: ${mf} (${Math.round(mf/candidats.length*100)}%)`, 115, niveauY);
-    doc.setTextColor(239, 68, 68); // Rouge MI
-    doc.text(`MI: ${mi} (${Math.round(mi/candidats.length*100)}%)`, 160, niveauY);
-
-    // === TABLEAU DES ÉLÈVES ===
-    candidats.sort((a, b) => {
-        if (a.classe !== b.classe) return a.classe.localeCompare(b.classe);
-        return a.nom.localeCompare(b.nom);
+    tranches.forEach(t => {
+        t.count = notes.filter(note => note >= t.min && note < t.max).length;
+        if (t.max === 20) t.count = notes.filter(note => note >= t.min && note <= t.max).length;
+        t.pct = Math.round((t.count / n) * 100);
     });
 
-    const tableData = candidats.map(c => [
-        c.numero,
-        `${c.nom} ${c.prenom}`,
-        c.classe,
-        c.note.toFixed(1),
-        c.niveau
-    ]);
+    // Notes par classe
+    const classes = [...new Set(candidats.map(c => c.classe))].sort();
+    const notesByClass = {};
+    classes.forEach(cl => {
+        notesByClass[cl] = candidats.filter(c => c.classe === cl)
+            .sort((a, b) => b.note - a.note)
+            .map(c => ({ nom: c.nom, prenom: c.prenom, note: c.note }));
+    });
 
-    // Couleurs par niveau pour les cellules
-    const niveauColors = {
-        'TBM': [220, 252, 231], // Vert clair
-        'MS': [219, 234, 254],  // Bleu clair
-        'MF': [254, 243, 199],  // Orange clair
-        'MI': [254, 226, 226]   // Rouge clair
+    // Fonction pour couleur selon note
+    const getNoteColor = (note) => {
+        if (note >= 15) return '#16a34a';
+        if (note >= 10) return '#2563eb';
+        if (note >= 5) return '#ea580c';
+        return '#dc2626';
     };
 
-    doc.autoTable({
-        startY: 90,
-        head: [['N°', 'Nom Prénom', 'Classe', 'Note', 'Niveau']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: {
-            fillColor: [102, 126, 234],
-            textColor: 255,
-            fontStyle: 'bold',
-            halign: 'center'
-        },
-        styles: {
-            fontSize: 9,
-            cellPadding: 3
-        },
-        columnStyles: {
-            0: { cellWidth: 15, halign: 'center' },
-            1: { cellWidth: 65 },
-            2: { cellWidth: 28, halign: 'center' },
-            3: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
-            4: { cellWidth: 22, halign: 'center', fontStyle: 'bold' }
-        },
-        didParseCell: function(data) {
-            // Colorer la colonne Niveau
-            if (data.section === 'body' && data.column.index === 4) {
-                const niveau = data.cell.raw;
-                if (niveauColors[niveau]) {
-                    data.cell.styles.fillColor = niveauColors[niveau];
-                }
-            }
-            // Colorer la note selon le niveau
-            if (data.section === 'body' && data.column.index === 3) {
-                const niveau = tableData[data.row.index][4];
-                if (niveau === 'TBM') data.cell.styles.textColor = [22, 163, 74];
-                else if (niveau === 'MS') data.cell.styles.textColor = [37, 99, 235];
-                else if (niveau === 'MF') data.cell.styles.textColor = [217, 119, 6];
-                else if (niveau === 'MI') data.cell.styles.textColor = [220, 38, 38];
-            }
-        },
-        alternateRowStyles: {
-            fillColor: [249, 250, 251]
+    const getNoteFillColor = (note) => {
+        if (note >= 15) return '#dcfce7';
+        if (note >= 10) return '#dbeafe';
+        if (note >= 5) return '#ffedd5';
+        return '#fee2e2';
+    };
+
+    // Capturer les graphiques du dashboard
+    let distributionChartImg = null;
+    let masteryChartImg = null;
+    let exerciseChartImg = null;
+
+    // Fonction pour valider une image base64
+    const isValidImage = (dataUrl) => {
+        return dataUrl && dataUrl.length > 100 && dataUrl.startsWith('data:image/png;base64,');
+    };
+
+    try {
+        const distCanvas = document.getElementById('distributionChartCanvas');
+        if (distCanvas) {
+            const img = distCanvas.toDataURL('image/png');
+            if (isValidImage(img)) distributionChartImg = img;
         }
+
+        const masteryCanvas = document.getElementById('masteryChartCanvas');
+        if (masteryCanvas) {
+            const img = masteryCanvas.toDataURL('image/png');
+            if (isValidImage(img)) masteryChartImg = img;
+        }
+
+        const exCanvas = document.getElementById('exerciseChartCanvas');
+        if (exCanvas) {
+            const img = exCanvas.toDataURL('image/png');
+            if (isValidImage(img)) exerciseChartImg = img;
+        }
+    } catch (e) {
+        console.log('Erreur capture graphiques:', e);
+    }
+
+    // Calculer les stats par exercice
+    const exerciseStats = getExerciseStatsForPDF();
+
+    // === CONSTRUCTION DU DOCUMENT PDFMAKE ===
+    const docDefinition = {
+        pageSize: 'A4',
+        pageMargins: [25, 25, 25, 25],
+        defaultStyle: {
+            font: 'Roboto',
+            fontSize: 9
+        },
+        content: [
+            // === EN-TÊTE ===
+            {
+                columns: [
+                    {
+                        width: '*',
+                        stack: [
+                            { text: 'DNB Blanc - Mathématiques', style: 'mainTitle' },
+                            { text: `Bilan ${className} - Décembre 2025`, style: 'subtitle' }
+                        ]
+                    },
+                    {
+                        width: 'auto',
+                        stack: [
+                            { text: `${n} élèves`, style: 'headerStat', alignment: 'right' },
+                            { text: `Moyenne: ${moyenne}/20`, style: 'headerStatBig', alignment: 'right' }
+                        ]
+                    }
+                ],
+                margin: [0, 0, 0, 15]
+            },
+
+            // === TABLEAU RÉPARTITION ===
+            {
+                table: {
+                    widths: ['*', '*', '*', '*', 60],
+                    body: [
+                        // En-tête avec couleurs
+                        [
+                            { text: '0 à 5', style: 'tableHeader', fillColor: '#dc2626' },
+                            { text: '5 à 10', style: 'tableHeader', fillColor: '#ea580c' },
+                            { text: '10 à 15', style: 'tableHeader', fillColor: '#ca8a04' },
+                            { text: '15 à 20', style: 'tableHeader', fillColor: '#16a34a' },
+                            { text: 'Total', style: 'tableHeader', fillColor: '#374151' }
+                        ],
+                        // Effectifs
+                        [
+                            { text: `${tranches[0].count}`, style: 'tableCell', bold: true },
+                            { text: `${tranches[1].count}`, style: 'tableCell', bold: true },
+                            { text: `${tranches[2].count}`, style: 'tableCell', bold: true },
+                            { text: `${tranches[3].count}`, style: 'tableCell', bold: true },
+                            { text: `${n}`, style: 'tableCell', bold: true, fillColor: '#f3f4f6' }
+                        ],
+                        // Pourcentages
+                        [
+                            { text: `${tranches[0].pct}%`, style: 'tableCellSmall', color: '#dc2626' },
+                            { text: `${tranches[1].pct}%`, style: 'tableCellSmall', color: '#ea580c' },
+                            { text: `${tranches[2].pct}%`, style: 'tableCellSmall', color: '#ca8a04' },
+                            { text: `${tranches[3].pct}%`, style: 'tableCellSmall', color: '#16a34a' },
+                            { text: '100%', style: 'tableCellSmall', color: '#374151' }
+                        ]
+                    ]
+                },
+                layout: {
+                    hLineWidth: () => 1,
+                    vLineWidth: () => 1,
+                    hLineColor: () => '#d1d5db',
+                    vLineColor: () => '#d1d5db'
+                },
+                margin: [0, 0, 0, 15]
+            },
+
+            // === STATISTIQUES ===
+            {
+                columns: [
+                    // Colonne gauche: Stats
+                    {
+                        width: '55%',
+                        stack: [
+                            { text: 'Statistiques', style: 'sectionTitle', margin: [0, 0, 0, 8] },
+                            {
+                                table: {
+                                    widths: [80, 50, 80, 50],
+                                    body: [
+                                        [
+                                            { text: 'Moyenne', fillColor: '#fef3c7', bold: true, margin: [5, 4] },
+                                            { text: moyenne, color: '#1e40af', bold: true, margin: [5, 4] },
+                                            { text: 'Médiane', fillColor: '#fef3c7', bold: true, margin: [5, 4] },
+                                            { text: mediane, color: '#1e40af', bold: true, margin: [5, 4] }
+                                        ],
+                                        [
+                                            { text: 'Minimum', fillColor: '#dcfce7', bold: true, margin: [5, 4] },
+                                            { text: min, margin: [5, 4] },
+                                            { text: 'Maximum', fillColor: '#fee2e2', bold: true, margin: [5, 4] },
+                                            { text: max, margin: [5, 4] }
+                                        ],
+                                        [
+                                            { text: 'Quartile 1', fillColor: '#ffedd5', bold: true, margin: [5, 4] },
+                                            { text: q1, margin: [5, 4] },
+                                            { text: 'Quartile 3', fillColor: '#ffedd5', bold: true, margin: [5, 4] },
+                                            { text: q3, margin: [5, 4] }
+                                        ]
+                                    ]
+                                },
+                                layout: {
+                                    hLineWidth: () => 1,
+                                    vLineWidth: () => 1,
+                                    hLineColor: () => '#e5e7eb',
+                                    vLineColor: () => '#e5e7eb'
+                                }
+                            }
+                        ]
+                    },
+                    // Colonne droite: Niveaux de maîtrise
+                    {
+                        width: '45%',
+                        stack: [
+                            { text: 'Niveaux de maîtrise', style: 'sectionTitle', margin: [10, 0, 0, 8] },
+                            {
+                                table: {
+                                    widths: ['*', 40, 50],
+                                    body: [
+                                        [
+                                            { text: 'TBM (≥15)', fillColor: '#dcfce7', color: '#166534', bold: true, margin: [5, 3] },
+                                            { text: candidats.filter(c => c.note >= 15).length, alignment: 'center', margin: [5, 3] },
+                                            { text: `${Math.round(candidats.filter(c => c.note >= 15).length / n * 100)}%`, alignment: 'center', color: '#166534', margin: [5, 3] }
+                                        ],
+                                        [
+                                            { text: 'MS (≥10)', fillColor: '#dbeafe', color: '#1e40af', bold: true, margin: [5, 3] },
+                                            { text: candidats.filter(c => c.note >= 10 && c.note < 15).length, alignment: 'center', margin: [5, 3] },
+                                            { text: `${Math.round(candidats.filter(c => c.note >= 10 && c.note < 15).length / n * 100)}%`, alignment: 'center', color: '#1e40af', margin: [5, 3] }
+                                        ],
+                                        [
+                                            { text: 'MF (≥5)', fillColor: '#ffedd5', color: '#c2410c', bold: true, margin: [5, 3] },
+                                            { text: candidats.filter(c => c.note >= 5 && c.note < 10).length, alignment: 'center', margin: [5, 3] },
+                                            { text: `${Math.round(candidats.filter(c => c.note >= 5 && c.note < 10).length / n * 100)}%`, alignment: 'center', color: '#c2410c', margin: [5, 3] }
+                                        ],
+                                        [
+                                            { text: 'MI (<5)', fillColor: '#fee2e2', color: '#dc2626', bold: true, margin: [5, 3] },
+                                            { text: candidats.filter(c => c.note < 5).length, alignment: 'center', margin: [5, 3] },
+                                            { text: `${Math.round(candidats.filter(c => c.note < 5).length / n * 100)}%`, alignment: 'center', color: '#dc2626', margin: [5, 3] }
+                                        ]
+                                    ]
+                                },
+                                layout: {
+                                    hLineWidth: () => 1,
+                                    vLineWidth: () => 1,
+                                    hLineColor: () => '#e5e7eb',
+                                    vLineColor: () => '#e5e7eb'
+                                },
+                                margin: [10, 0, 0, 0]
+                            }
+                        ]
+                    }
+                ],
+                margin: [0, 0, 0, 15]
+            },
+
+            // === DÉTAIL PAR EXERCICE ===
+            { text: 'Performance par exercice', style: 'sectionTitle', margin: [0, 5, 0, 8] },
+            {
+                table: {
+                    widths: ['*', '*', '*', '*', '*'],
+                    body: [
+                        // En-têtes exercices
+                        exerciseStats.map(ex => ({
+                            text: `${ex.icon} ${ex.name}`,
+                            style: 'tableHeader',
+                            fillColor: ex.color,
+                            alignment: 'center'
+                        })),
+                        // Scores moyens
+                        exerciseStats.map(ex => ({
+                            text: `${ex.mean.toFixed(1)}/${ex.max}`,
+                            alignment: 'center',
+                            bold: true,
+                            fontSize: 11,
+                            margin: [0, 5]
+                        })),
+                        // Taux de réussite
+                        exerciseStats.map(ex => ({
+                            text: `${ex.pct}%`,
+                            alignment: 'center',
+                            color: ex.pct >= 60 ? '#16a34a' : ex.pct >= 40 ? '#ca8a04' : '#dc2626',
+                            fontSize: 10,
+                            margin: [0, 3]
+                        }))
+                    ]
+                },
+                layout: {
+                    hLineWidth: () => 1,
+                    vLineWidth: () => 1,
+                    hLineColor: () => '#d1d5db',
+                    vLineColor: () => '#d1d5db'
+                },
+                margin: [0, 0, 0, 15]
+            },
+
+            // === NOTES PAR CLASSE ===
+            { text: 'Notes par classe', style: 'sectionTitle', margin: [0, 5, 0, 8] },
+            buildClassNotesTable(classes, notesByClass, getNoteColor, getNoteFillColor),
+
+            // === PIED DE PAGE ===
+            {
+                text: `Généré le ${new Date().toLocaleDateString('fr-FR')} - DNB Blanc 25-26`,
+                style: 'footer',
+                margin: [0, 15, 0, 0]
+            }
+        ],
+        styles: {
+            mainTitle: {
+                fontSize: 18,
+                bold: true,
+                color: '#1e40af'
+            },
+            subtitle: {
+                fontSize: 12,
+                color: '#374151',
+                margin: [0, 3, 0, 0]
+            },
+            headerStat: {
+                fontSize: 10,
+                color: '#6b7280'
+            },
+            headerStatBig: {
+                fontSize: 14,
+                bold: true,
+                color: '#1e40af'
+            },
+            sectionTitle: {
+                fontSize: 11,
+                bold: true,
+                color: '#1f2937'
+            },
+            tableHeader: {
+                fontSize: 9,
+                bold: true,
+                color: '#ffffff',
+                alignment: 'center',
+                margin: [0, 6]
+            },
+            tableCell: {
+                fontSize: 12,
+                alignment: 'center',
+                margin: [0, 6]
+            },
+            tableCellSmall: {
+                fontSize: 9,
+                alignment: 'center',
+                margin: [0, 3]
+            },
+            footer: {
+                fontSize: 8,
+                color: '#9ca3af',
+                alignment: 'center'
+            }
+        }
+    };
+
+    // === PAGE 2: GRAPHIQUES (si disponibles) ===
+    if (distributionChartImg || masteryChartImg || exerciseChartImg) {
+        docDefinition.content.push({ text: '', pageBreak: 'before' });
+        docDefinition.content.push({
+            text: 'Analyse graphique détaillée',
+            style: 'mainTitle',
+            alignment: 'center',
+            margin: [0, 0, 0, 20]
+        });
+
+        const chartsRow = [];
+
+        if (distributionChartImg) {
+            chartsRow.push({
+                stack: [
+                    { text: 'Répartition des notes', style: 'sectionTitle', alignment: 'center', margin: [0, 0, 0, 5] },
+                    { image: distributionChartImg, width: 240, alignment: 'center' }
+                ],
+                width: '50%'
+            });
+        }
+
+        if (masteryChartImg) {
+            chartsRow.push({
+                stack: [
+                    { text: 'Niveaux de maîtrise', style: 'sectionTitle', alignment: 'center', margin: [0, 0, 0, 5] },
+                    { image: masteryChartImg, width: 240, alignment: 'center' }
+                ],
+                width: '50%'
+            });
+        }
+
+        if (chartsRow.length > 0) {
+            docDefinition.content.push({
+                columns: chartsRow,
+                margin: [0, 0, 0, 20]
+            });
+        }
+
+        if (exerciseChartImg) {
+            docDefinition.content.push({
+                stack: [
+                    { text: 'Performance par exercice', style: 'sectionTitle', alignment: 'center', margin: [0, 0, 0, 5] },
+                    { image: exerciseChartImg, width: 450, alignment: 'center' }
+                ],
+                margin: [0, 0, 0, 20]
+            });
+        }
+    }
+
+    // Générer le PDF
+    pdfMake.createPdf(docDefinition).download(`Bilan_${className.replace(/\s/g, '_')}.pdf`);
+}
+
+// Fonction helper pour construire le tableau des notes par classe
+function buildClassNotesTable(classes, notesByClass, getNoteColor, getNoteFillColor) {
+    const classColors = ['#dc2626', '#ea580c', '#16a34a', '#2563eb', '#7c3aed'];
+    const maxRows = Math.max(...classes.map(cl => notesByClass[cl].length));
+
+    // En-têtes
+    const headerRow = classes.map((cl, i) => ({
+        text: cl,
+        style: 'tableHeader',
+        fillColor: classColors[i % classColors.length],
+        alignment: 'center'
+    }));
+
+    // Lignes de données - uniquement les notes
+    const dataRows = [];
+    for (let i = 0; i < Math.min(maxRows, 35); i++) { // Limiter à 35 lignes
+        const row = classes.map(cl => {
+            const student = notesByClass[cl][i];
+            if (!student) return { text: '', margin: [2, 3] };
+
+            return {
+                text: student.note.toFixed(1),
+                fontSize: 9,
+                bold: true,
+                fillColor: getNoteFillColor(student.note),
+                color: getNoteColor(student.note),
+                alignment: 'center',
+                margin: [2, 3]
+            };
+        });
+        dataRows.push(row);
+    }
+
+    return {
+        table: {
+            widths: classes.map(() => '*'),
+            body: [headerRow, ...dataRows]
+        },
+        layout: {
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#e5e7eb',
+            vLineColor: () => '#e5e7eb'
+        }
+    };
+}
+
+// Fonction pour obtenir les stats par exercice pour le PDF
+function getExerciseStatsForPDF() {
+    const candidats = filterByClass(getCorrectedCandidates());
+    const exercises = [
+        { num: 1, name: 'Course', icon: '🏃', max: 6, color: '#16a34a' },
+        { num: 2, name: 'Bonbons', icon: '🍬', max: 4, color: '#7c3aed' },
+        { num: 3, name: 'CO2', icon: '🌍', max: 3, color: '#2563eb' },
+        { num: 4, name: 'Scratch', icon: '🐱', max: 4, color: '#ca8a04' },
+        { num: 5, name: 'Trajet', icon: '🚗', max: 3, color: '#dc2626' }
+    ];
+
+    return exercises.map(ex => {
+        let totalScore = 0;
+        let count = 0;
+        candidats.forEach(c => {
+            const scores = calculateExerciseScores(c.numero);
+            if (scores[ex.num] !== undefined) {
+                totalScore += scores[ex.num];
+                count++;
+            }
+        });
+        const mean = count > 0 ? totalScore / count : 0;
+        const pct = Math.round((mean / ex.max) * 100);
+
+        return { ...ex, mean, pct };
     });
+}
 
-    // === PIED DE PAGE ===
-    const finalY = doc.lastAutoTable.finalY + 10;
-    doc.setFontSize(8);
-    doc.setTextColor(156, 163, 175);
-    doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')} - DNB Blanc 25-26`, pageWidth / 2, finalY, { align: 'center' });
+// Fonction pour générer les cartes détail exercice
+function getExerciseDetailCards() {
+    const candidats = filterByClass(getCorrectedCandidates());
+    const exercises = [
+        { num: 1, name: 'Course', icon: '🏃', max: 6, color: '#22c55e' },
+        { num: 2, name: 'Bonbons', icon: '🍬', max: 4, color: '#8b5cf6' },
+        { num: 3, name: 'CO2', icon: '🌍', max: 3, color: '#3b82f6' },
+        { num: 4, name: 'Scratch', icon: '🐱', max: 4, color: '#f59e0b' },
+        { num: 5, name: 'Trajet', icon: '🚗', max: 3, color: '#ef4444' }
+    ];
 
-    doc.save(`Bilan_Classe_${className.replace(/\s/g, '_')}.pdf`);
+    return exercises.map(ex => {
+        let totalScore = 0;
+        let count = 0;
+        candidats.forEach(c => {
+            const scores = calculateExerciseScores(c.numero);
+            if (scores[ex.num] !== undefined) {
+                totalScore += scores[ex.num];
+                count++;
+            }
+        });
+        const mean = count > 0 ? totalScore / count : 0;
+        const pct = Math.round((mean / ex.max) * 100);
+
+        return `
+            <div style="flex:1; background:white; border-radius:6px; padding:8px; text-align:center; border:1px solid #e5e7eb;">
+                <div style="font-size:16px;">${ex.icon}</div>
+                <div style="font-size:9px; color:#6b7280;">${ex.name}</div>
+                <div style="font-size:12px; font-weight:bold; color:#1f2937;">${mean.toFixed(1)}/${ex.max}</div>
+                <div style="height:3px; background:#e5e7eb; border-radius:2px; margin:4px 0;">
+                    <div style="height:100%; width:${pct}%; background:${ex.color}; border-radius:2px;"></div>
+                </div>
+                <div style="font-size:8px; color:#9ca3af;">${pct}%</div>
+            </div>
+        `;
+    }).join('');
 }
 
 // === EXPORT EXCEL CLASSE ===

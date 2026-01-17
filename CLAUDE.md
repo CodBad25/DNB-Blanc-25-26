@@ -260,11 +260,24 @@ Nouvelle page complète pour générer les bilans et résultats :
 ## Versions actuelles (17 janvier 2026)
 
 - **CSS (main)** : `v=20260117002`
-- **CSS (bilans)** : `v=20260117006`
+- **CSS (bilans)** : `v=20260117025`
 - **JS (app.js)** : `v=20260117003`
-- **JS (bilansManager.js)** : `v=20260117005`
+- **JS (bilansManager.js)** : `v=20260117024`
 
 ## Changelog récent
+
+### 17 janvier 2026 (nuit)
+- ✅ **PDF pdfmake** : Remplacement de html2pdf par pdfmake pour génération PDF professionnelle
+  - Tableaux avec couleurs (répartition, statistiques, niveaux de maîtrise)
+  - Notes par classe avec code couleur
+  - Performance par exercice
+  - Capture des graphiques Chart.js (si disponibles)
+- ✅ **Fix débordement horizontal** : Ajout de contraintes CSS sur tous les conteneurs
+  - `overflow: hidden` sur .tab-content, .tab-panel, grilles
+  - `min-width: 0` sur enfants de Grid/Flexbox
+  - `box-sizing: border-box` explicite
+- ✅ **Fix flou Retina** : `Chart.defaults.devicePixelRatio = window.devicePixelRatio`
+- ✅ **bilans-v2.html** : Version alternative du dashboard (non utilisée, pour comparaison)
 
 ### 17 janvier 2026 (soir)
 - ✅ Page Bilans & Résultats complète
