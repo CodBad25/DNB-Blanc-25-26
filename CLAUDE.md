@@ -225,14 +225,55 @@ Les modifications sont automatiquement déployées sur Netlify à chaque push su
 - [ ] Ajouter un système de versioning des packs
 - [ ] Synchronisation des corrections entre correcteurs (cloud)
 
+### 14. Page Bilans & Résultats (17 janvier 2026)
+**Fichiers** : `bilans.html`, `css/bilans.css`, `js/modules/bilansManager.js`
+
+Nouvelle page complète pour générer les bilans et résultats :
+
+**Navigation par onglets (4 étapes)** :
+1. **Import** : Import JSON des corrections + CSV/Excel pour désanonymat
+2. **Vue d'ensemble** : Statistiques, graphiques Chart.js, recommandations pédagogiques
+3. **Élèves** : Tableau détaillé avec filtres et recherche
+4. **Génération** : Export PDF et Excel
+
+**Fonctionnalités PDF** :
+- **PDF individuels** : Un PDF par élève avec grille NR (questions non répondues)
+- **PDF groupés** : 2 bilans par page A4, idéal pour impression
+- **PDF récapitulatif classe** : Tableau avec statistiques
+- **Export Excel** : Données complètes avec statistiques
+
+**Grille NR (Questions traitées)** :
+- Affiche visuellement l'état de chaque question par exercice
+- Carrés verts = répondu, gris = non répondu (NR)
+- Compteur par exercice et total
+- Intégrée dans les PDF individuels et groupés
+
+**Graphiques interactifs (Chart.js)** :
+- Donut : Répartition des niveaux de maîtrise
+- Barres : Taux de réussite par exercice
+
+**Recommandations pédagogiques** :
+- 🚨 Priorité absolue : exercices < 50% de réussite
+- ⚠️ À améliorer : exercices 50-70%
+- ✅ Points forts : exercices > 70%
+
 ## Versions actuelles (17 janvier 2026)
 
-- **CSS** : `v=20260117002`
+- **CSS (main)** : `v=20260117002`
+- **CSS (bilans)** : `v=20260117006`
 - **JS (app.js)** : `v=20260117003`
+- **JS (bilansManager.js)** : `v=20260117005`
 
 ## Changelog récent
 
-### 17 janvier 2026
+### 17 janvier 2026 (soir)
+- ✅ Page Bilans & Résultats complète
+- ✅ Grille NR (questions non répondues) dans les PDF
+- ✅ PDF groupés par classe (2 bilans par page A4)
+- ✅ Graphiques Chart.js (donut + barres)
+- ✅ Recommandations pédagogiques automatiques
+
+### 17 janvier 2026 (matin)
 - ✅ Fix navigation auto pour compétences 1pt
 - ✅ Configuration seuils de maîtrise dans Admin
 - ✅ Amélioration visuelle onglets d'exercices

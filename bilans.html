@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNB Blanc 25-26 - Bilans & Résultats</title>
+    <!-- SheetJS pour lecture Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF pour génération PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- html2canvas pour capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- html2pdf pour génération PDF simple -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Chart.js pour graphiques interactifs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/bilans.css?v=20260117016">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header compact -->
+        <header class="app-header">
+            <a href="index.html" class="back-link">← Retour</a>
+            <div class="header-content">
+                <div class="header-icon">📊</div>
+                <h1>Bilans & Résultats</h1>
+                <p class="header-subtitle">DNB Blanc - Décembre 2025</p>
+            </div>
+            <div style="width:70px;"></div>
+        </header>
+
+        <!-- Navigation par onglets/étapes -->
+        <nav class="tabs-nav">
+            <button class="tab-btn active" data-tab="import" onclick="switchTab('import')">
+                <span class="tab-number">1</span>
+                <span class="tab-label">Import</span>
+                <span class="tab-sublabel">Données sources</span>
+            </button>
+            <button class="tab-btn" data-tab="overview" onclick="switchTab('overview')" disabled>
+                <span class="tab-number">2</span>
+                <span class="tab-label">Vue d'ensemble</span>
+                <span class="tab-sublabel">Statistiques globales</span>
+            </button>
+            <button class="tab-btn" data-tab="students" onclick="switchTab('students')" disabled>
+                <span class="tab-number">3</span>
+                <span class="tab-label">Élèves</span>
+                <span class="tab-sublabel">Résultats détaillés</span>
+            </button>
+            <button class="tab-btn" data-tab="generate" onclick="switchTab('generate')" disabled>
+                <span class="tab-number">4</span>
+                <span class="tab-label">Génération</span>
+                <span class="tab-sublabel">PDF & Export</span>
+            </button>
+        </nav>
+
+        <!-- Contenu des onglets -->
+        <main class="tab-content">
+
+            <!-- ONGLET 1: IMPORT -->
+            <section class="tab-panel active" id="tab-import">
+                <div class="panel-header">
+                    <h2>📥 Import des données</h2>
+                    <p>Importez les corrections et la liste des élèves pour générer les bilans</p>
+                </div>
+
+                <div class="import-grid">
+                    <!-- Import JSON -->
+                    <div class="import-card" id="importCardJSON">
+                        <div class="import-card-header">
+                            <span class="import-step">1</span>
+                            <div class="import-card-title">
+                                <h3>Corrections</h3>
+                                <p>Fichier JSON exporté depuis l'app</p>
+                            </div>
+                            <span class="import-status" id="jsonStatus">Non importé</span>
+                        </div>
+
+                        <div class="import-card-body" id="jsonDropzone">
+                            <div class="dropzone" id="dropzoneJSON">
+                                <div class="dropzone-icon">📋</div>
+                                <p class="dropzone-title">Déposez le fichier JSON</p>
+                                <p class="dropzone-hint">ou cliquez pour parcourir</p>
+                                <input type="file" id="jsonInput" accept=".json" hidden>
+                            </div>
+                        </div>
+
+                        <div class="import-card-success" id="jsonSuccess" style="display:none;">
+                            <div class="success-icon">✅</div>
+                            <div class="success-info">
+                                <strong id="jsonCount">0 candidats</strong>
+                                <span>corrigés</span>
+                            </div>
+                            <button class="btn-modify" onclick="resetCorrections()">Modifier</button>
+                        </div>
+                    </div>
+
+                    <!-- Import CSV/Excel -->
+                    <div class="import-card" id="importCardCSV">
+                        <div class="import-card-header">
+                            <span class="import-step">2</span>
+                            <div class="import-card-title">
+                                <h3>Liste des élèves</h3>
+                                <p>Fichier CSV ou Excel pour désanonymat</p>
+                            </div>
+                            <span class="import-status" id="csvStatus">Non importé</span>
+                        </div>
+
+                        <div class="import-card-body" id="csvDropzone">
+                            <div class="dropzone" id="dropzone">
+                                <div class="dropzone-icon">📁</div>
+                                <p class="dropzone-title">Déposez le fichier CSV/Excel</p>
+                                <p class="dropzone-hint">Colonnes : numéro, nom, prénom, classe</p>
+                                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" hidden>
+                            </div>
+                        </div>
+
+                        <div class="import-card-success" id="csvSuccess" style="display:none;">
+                            <div class="success-icon">✅</div>
+                            <div class="success-info">
+                                <strong id="csvCount">0 élèves</strong>
+                                <span id="csvClasses">importés</span>
+                            </div>
+                            <button class="btn-modify" onclick="resetImport()">Modifier</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aperçu avant validation -->
+                <div class="preview-card" id="previewSection" style="display:none;">
+                    <h3>Aperçu des données</h3>
+                    <div class="preview-stats">
+                        <span><strong id="totalEleves">0</strong> élèves</span>
+                        <span><strong id="totalClasses">0</strong> classes</span>
+                    </div>
+                    <div class="preview-table-wrap">
+                        <table class="preview-table">
+                            <thead>
+                                <tr><th>N°</th><th>Nom</th><th>Prénom</th><th>Classe</th></tr>
+                            </thead>
+                            <tbody id="previewTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn-secondary" onclick="cancelImport()">Annuler</button>
+                        <button class="btn-primary" onclick="confirmImport()">✓ Valider l'import</button>
+                    </div>
+                </div>
+
+                <!-- Bouton continuer -->
+                <div class="import-actions" id="importActions" style="display:none;">
+                    <button class="btn-continue" onclick="switchTab('overview')">
+                        Continuer vers les analyses →
+                    </button>
+                </div>
+            </section>
+
+            <!-- ONGLET 2: VUE D'ENSEMBLE -->
+            <section class="tab-panel" id="tab-overview">
+                <!-- Header + Filtre -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+                    <div class="panel-header" style="margin-bottom:0;">
+                        <h2>📊 Vue d'ensemble</h2>
+                    </div>
+                    <div class="filter-bar">
+                        <label>Classe :</label>
+                        <div class="class-chips" id="classChips">
+                            <button class="chip active" data-class="all" onclick="selectClass('all')">Toutes</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats rapides -->
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="statMoyenne">--</div>
+                            <div class="stat-label">Moyenne</div>
+                        </div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="statMediane">--</div>
+                            <div class="stat-label">Médiane</div>
+                        </div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon">📏</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="statEtendue">--</div>
+                            <div class="stat-label">Étendue</div>
+                        </div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="statChampion">--</div>
+                            <div class="stat-label" id="statChampionName">Meilleure note</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques - Ligne 1 -->
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>Répartition des notes</h3>
+                        <p class="chart-subtitle">Distribution par tranches de 2 points</p>
+                        <div class="chart-container"><canvas id="distributionChartCanvas"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Niveaux de maîtrise</h3>
+                        <p class="chart-subtitle">Répartition des élèves</p>
+                        <div class="chart-container"><canvas id="masteryChartCanvas"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Graphiques - Ligne 2 -->
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>Performance par exercice</h3>
+                        <p class="chart-subtitle">Taux de réussite moyen</p>
+                        <div class="chart-container"><canvas id="exerciseChartCanvas"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Dispersion des notes</h3>
+                        <p class="chart-subtitle">Min, Q1, Médiane, Q3, Max</p>
+                        <div class="chart-container" id="boxPlotContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Détail par exercice -->
+                <div class="detail-exercices-section">
+                    <h3>📋 Détail par exercice</h3>
+                    <p class="chart-subtitle">Score moyen et taux de réussite</p>
+                    <div class="exercise-detail-grid" id="exerciseDetailGrid"></div>
+                </div>
+
+                <!-- Recommandations pédagogiques -->
+                <div class="recommendations-section">
+                    <h3>🎯 Recommandations pédagogiques</h3>
+                    <p class="chart-subtitle">Basées sur les performances des élèves</p>
+                    <div class="recommendation-grid" id="recommendationGrid"></div>
+                </div>
+            </section>
+
+            <!-- ONGLET 3: ÉLÈVES -->
+            <section class="tab-panel" id="tab-students">
+                <div class="panel-header">
+                    <h2>👥 Résultats des élèves</h2>
+                    <p>Liste détaillée avec notes et niveaux de maîtrise</p>
+                </div>
+
+                <!-- Filtre et recherche -->
+                <div class="toolbar">
+                    <div class="class-chips" id="classChips2">
+                        <button class="chip active" data-class="all" onclick="selectClass('all')">Toutes</button>
+                    </div>
+                    <input type="text" class="search-input" id="searchStudents" placeholder="🔍 Rechercher un élève..." oninput="filterStudentsTable()">
+                </div>
+
+                <!-- Tableau des résultats -->
+                <div class="results-table-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Nom Prénom</th>
+                                <th>Classe</th>
+                                <th>Note /20</th>
+                                <th>Niveau</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="no-results" id="noResults" style="display:none;">
+                    <span class="no-results-icon">📭</span>
+                    <p>Aucun résultat trouvé</p>
+                </div>
+            </section>
+
+            <!-- ONGLET 4: GÉNÉRATION -->
+            <section class="tab-panel" id="tab-generate">
+                <div class="panel-header">
+                    <h2>📄 Génération des bilans</h2>
+                    <p>Créez les PDF individuels et les exports de classe</p>
+                </div>
+
+                <div class="generate-grid">
+                    <!-- Bilans individuels -->
+                    <div class="generate-card">
+                        <div class="generate-icon">👤</div>
+                        <h3>Bilans individuels</h3>
+                        <p>Un PDF par élève avec note, compétences et grille des questions traitées</p>
+                        <div class="generate-buttons">
+                            <button class="btn-primary" onclick="generateAllIndividualPDF()">
+                                📄 Générer tous les PDF
+                            </button>
+                            <button class="btn-secondary" onclick="showIndividualSelector()">
+                                Choisir un élève
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bilans groupés par classe -->
+                    <div class="generate-card">
+                        <div class="generate-icon">📑</div>
+                        <h3>Bilans groupés</h3>
+                        <p>2 bilans par page, idéal pour l'impression et la distribution</p>
+                        <div class="generate-buttons">
+                            <button class="btn-primary" onclick="generateClassPDFGrouped()">
+                                📑 PDF groupés (2/page)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bilan de classe -->
+                    <div class="generate-card">
+                        <div class="generate-icon">📊</div>
+                        <h3>Récapitulatif classe</h3>
+                        <p>Tableau avec statistiques et répartition des niveaux de maîtrise</p>
+                        <div class="generate-buttons">
+                            <button class="btn-primary" onclick="generateClassPDF()">
+                                📊 PDF récapitulatif
+                            </button>
+                            <button class="btn-secondary" onclick="exportClassExcel()">
+                                📗 Export Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtre classe pour génération -->
+                <div class="generate-filter">
+                    <label>Générer pour :</label>
+                    <div class="class-chips" id="classChips3">
+                        <button class="chip active" data-class="all" onclick="selectClass('all')">Toutes les classes</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modale sélection individuelle -->
+    <div class="modal-overlay" id="individualModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sélectionner un élève</h3>
+                <button class="close-btn" onclick="closeIndividualModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="searchStudent" placeholder="Rechercher par nom ou numéro..." class="search-input">
+                <div class="student-list" id="studentList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale aperçu PDF -->
+    <div class="modal-overlay" id="pdfPreviewModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Aperçu du bilan</h3>
+                <button class="close-btn" onclick="closePdfPreview()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="pdfPreviewContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closePdfPreview()">Fermer</button>
+                <button class="btn-primary" onclick="downloadCurrentPdf()">📥 Télécharger PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/modules/bilansManager.js?v=20260117017"></script>
+</body>
+</html>

@@ -1147,6 +1147,32 @@
         </div>
     </div>
 
+    <!-- === MODALE DE CONFIRMATION CORRECTION INCOMPLÈTE === -->
+    <div class="modal-overlay" id="incompleteModal">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);">
+                <h3 style="margin: 0; font-size: 1.3em;">⚠️ Correction incomplète</h3>
+            </div>
+            <div style="padding: 25px;">
+                <div style="font-size: 3em; margin-bottom: 15px;">📝</div>
+                <p style="font-size: 1.1em; color: #333; margin-bottom: 10px;">
+                    Seulement <strong id="incompleteAnswered" style="color: #e74c3c;">0</strong> / <strong id="incompleteTotal">0</strong> questions ont été traitées.
+                </p>
+                <p style="color: #666; font-size: 0.95em;">
+                    Voulez-vous vraiment valider cette correction ?
+                </p>
+            </div>
+            <div class="modal-buttons" style="padding: 0 25px 25px; gap: 12px;">
+                <button class="modal-btn cancel" onclick="closeIncompleteModal()" style="flex: 1;">
+                    ✏️ Continuer la correction
+                </button>
+                <button class="modal-btn save" onclick="forceValidateCorrection()" style="flex: 1; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                    ✅ Valider quand même
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- === MODALE DE VALIDATION AVEC SYNTHÈSE INTÉGRÉE === -->
     <div class="modal-overlay" id="validationModal">
         <div class="modal-content validation-synthesis-modal">
@@ -1597,6 +1623,6 @@
     <script src="js/modules/packManager.js?v=20260114018"></script>
     <!-- Barèmes prédéfinis -->
     <script src="js/baremes/bb1_2025.js?v=20260114001"></script>
-    <script src="js/app.js?v=20260117006"></script>
+    <script src="js/app.js?v=20260117007"></script>
 </body>
 </html>

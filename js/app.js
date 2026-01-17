@@ -6567,6 +6567,35 @@ function validateCorrection() {
     
     const details = calculateCandidateDetails(candidate.number);
 
+    // Vérifier si toutes les questions sont traitées
+    if (details.questionsAnswered < details.totalQuestions) {
+        // Afficher la modale de confirmation stylée
+        document.getElementById('incompleteAnswered').textContent = details.questionsAnswered;
+        document.getElementById('incompleteTotal').textContent = details.totalQuestions;
+        document.getElementById('incompleteModal').classList.add('active');
+        return;
+    }
+
+    // Si complet, continuer directement
+    showValidationModal();
+}
+
+// Fermer la modale de correction incomplète
+function closeIncompleteModal() {
+    document.getElementById('incompleteModal').classList.remove('active');
+}
+
+// Forcer la validation malgré correction incomplète
+function forceValidateCorrection() {
+    closeIncompleteModal();
+    showValidationModal();
+}
+
+// Afficher la modale de validation (code extrait de validateCorrection)
+function showValidationModal() {
+    const candidate = appState.activeCandidates[appState.currentCandidateIndex];
+    const details = calculateCandidateDetails(candidate.number);
+
     // Calculer les scores par compétence
     const competencesScores = calculateCompetencesScores(candidate.number);
     
