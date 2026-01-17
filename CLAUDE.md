@@ -109,6 +109,58 @@ const BB1_EXERCISES = {
 };
 ```
 
+### 11. Protection navigation automatique pour compétences 1pt (17 janvier 2026)
+**Fichiers** : `js/app.js` (lignes 4670, 4692, 4704, 4713, 8085-8102)
+
+**Problème résolu** : Avec l'ancien barème sur 100 points, les compétences avaient souvent 2+ points. La protection "compétence en cours" (`currentlyEditingCompetence`) ne s'appliquait qu'aux compétences > 1 point. Avec le nouveau barème sur 20, les compétences sont souvent de 1 point ou moins.
+
+**Solution** : Étendre la protection aux compétences >= 1 point :
+- Changé `competence.points > 1` en `competence.points >= 1` (4 occurrences)
+- Supprimé le bloc spécial qui court-circuitait les compétences de 1pt dans `getCompetenceProgressState()`
+
+**Comportement attendu** pour "Calculer 1pt" avec incrément 0.5 :
+- 1er clic : 0 → 0.5 → état "in-progress" → **pas de navigation automatique**
+- 2e clic : 0.5 → 1 → état "perfect" → navigation possible
+- Appui long : → 0 directement (raccourci pour éviter le cycle)
+
+### 12. Configuration des seuils de maîtrise (17 janvier 2026)
+**Fichiers** : `app.html` (onglet admin), `js/app.js` (fonctions `*MaitriseSeuils`), `js/state/appState.js`
+
+Nouvel onglet **"🎯 Niveaux de maîtrise"** dans le panneau Admin avec :
+- **4 niveaux configurables** :
+  - 🟢 TBM (Très bonne maîtrise) : Note ≥ seuil (défaut: 15)
+  - 🔵 MS (Maîtrise satisfaisante) : Note ≥ seuil (défaut: 10)
+  - 🟠 MF (Maîtrise fragile) : Note ≥ seuil (défaut: 5)
+  - 🔴 MI (Maîtrise insuffisante) : Note < MF
+- **Aperçu des plages** en temps réel
+- **Sauvegarde** dans localStorage (`dnb_maitrise_seuils`)
+- **Validation** : empêche les seuils incohérents (TBM > MS > MF)
+
+**Fonctions ajoutées** :
+- `getMasteryClass(noteOn20)` : retourne la classe CSS selon les seuils configurés
+- `loadMaitriseSeuils()` : charge les seuils au démarrage
+- `saveMaitriseSeuils()` / `resetMaitriseSeuils()` : gestion des seuils
+
+**État dans appState** :
+```javascript
+maitriseSeuils: {
+    tbm: 15,  // Très bonne maîtrise : note >= 15
+    ms: 10,   // Maîtrise satisfaisante : note >= 10
+    mf: 5     // Maîtrise fragile : note >= 5
+}
+```
+
+### 13. Onglets d'exercices améliorés (17 janvier 2026)
+**Fichiers** : `css/main.css` (lignes 504-541), `js/app.js` (fonction `renderExerciseTabs`, `showTab`)
+
+**Améliorations visuelles** :
+- **Taille augmentée** : `padding: 12px 20px`, `font-size: 1em`, icônes 18px
+- **Onglet actif** : gradient bleu, ombre portée, effet surélevé (`transform: translateY(-2px)`)
+- **Hover** : fond gris, bordure, légère élévation
+
+**Amélioration technique** :
+- Utilisation de `data-tab` attribute au lieu de `onclick.toString()` pour identifier l'onglet actif (plus fiable)
+
 ## Structure des fichiers principaux
 
 ```
@@ -173,8 +225,15 @@ Les modifications sont automatiquement déployées sur Netlify à chaque push su
 - [ ] Ajouter un système de versioning des packs
 - [ ] Synchronisation des corrections entre correcteurs (cloud)
 
-## En cours / À vérifier
+## Versions actuelles (17 janvier 2026)
 
-- [ ] **Vérifier que le score s'affiche bien à GAUCHE** dans la modale de validation après hard refresh
-  - CSS modifié : `order: -1` sur `.main-score-container`, `order: 1` sur `.competences-table-container`
-  - Version CSS : `v=20260115002`
+- **CSS** : `v=20260117002`
+- **JS (app.js)** : `v=20260117003`
+
+## Changelog récent
+
+### 17 janvier 2026
+- ✅ Fix navigation auto pour compétences 1pt
+- ✅ Configuration seuils de maîtrise dans Admin
+- ✅ Amélioration visuelle onglets d'exercices
+- ✅ Background par défaut sur score badge (fix cache)
