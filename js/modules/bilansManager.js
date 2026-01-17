@@ -1715,24 +1715,38 @@ function generateClassPDF() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
 
     const className = bilansState.selectedClass === 'all' ? 'Toutes classes' : bilansState.selectedClass;
 
-    // Titre
-    doc.setFontSize(20);
-    doc.setTextColor(102, 126, 234);
-    doc.text('DNB Blanc - Décembre 2025', 105, 20, { align: 'center' });
+    // === HEADER AVEC BANDEAU COLORÉ ===
+    // Gradient simulé avec rectangles
+    doc.setFillColor(102, 126, 234);
+    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.setFillColor(118, 75, 162);
+    doc.rect(0, 30, pageWidth, 8, 'F');
 
+    // Titre dans le header
+    doc.setFontSize(22);
+    doc.setTextColor(255, 255, 255);
+    doc.setFont(undefined, 'bold');
+    doc.text('DNB Blanc - Mathématiques', pageWidth / 2, 16, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Décembre 2025', pageWidth / 2, 26, { align: 'center' });
+
+    // === SOUS-TITRE CLASSE ===
     doc.setFontSize(16);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Bilan de classe : ${className}`, 105, 32, { align: 'center' });
+    doc.setTextColor(55, 65, 81);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Bilan de classe : ${className}`, pageWidth / 2, 50, { align: 'center' });
 
-    // Statistiques
+    // === STATISTIQUES ===
     const notes = candidats.map(c => c.note).sort((a, b) => a - b);
-    const moyenne = (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(2);
+    const moyenne = (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(1);
     const mediane = notes.length % 2 === 0
-        ? ((notes[notes.length / 2 - 1] + notes[notes.length / 2]) / 2).toFixed(2)
-        : notes[Math.floor(notes.length / 2)].toFixed(2);
+        ? ((notes[notes.length / 2 - 1] + notes[notes.length / 2]) / 2).toFixed(1)
+        : notes[Math.floor(notes.length / 2)].toFixed(1);
     const min = Math.min(...notes).toFixed(1);
     const max = Math.max(...notes).toFixed(1);
 
@@ -1741,12 +1755,45 @@ function generateClassPDF() {
     const mf = candidats.filter(c => c.niveau === 'MF').length;
     const mi = candidats.filter(c => c.niveau === 'MI').length;
 
-    doc.setFontSize(11);
-    doc.text(`Effectif: ${candidats.length}  |  Moyenne: ${moyenne}/20  |  Médiane: ${mediane}/20  |  Min: ${min}  |  Max: ${max}`, 105, 45, { align: 'center' });
-    doc.text(`TBM: ${tbm} (${Math.round(tbm/candidats.length*100)}%)  |  MS: ${ms} (${Math.round(ms/candidats.length*100)}%)  |  MF: ${mf} (${Math.round(mf/candidats.length*100)}%)  |  MI: ${mi} (${Math.round(mi/candidats.length*100)}%)`, 105, 53, { align: 'center' });
+    // Boîte statistiques
+    doc.setFillColor(249, 250, 251);
+    doc.setDrawColor(229, 231, 235);
+    doc.roundedRect(15, 55, pageWidth - 30, 28, 3, 3, 'FD');
 
-    // Tableau des élèves
-    candidats.sort((a, b) => a.nom.localeCompare(b.nom));
+    doc.setFontSize(10);
+    doc.setTextColor(107, 114, 128);
+    doc.setFont(undefined, 'normal');
+
+    // Ligne 1 : Stats générales
+    const statsY = 65;
+    doc.text(`Effectif: ${candidats.length}`, 25, statsY);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(59, 130, 246);
+    doc.text(`Moyenne: ${moyenne}/20`, 60, statsY);
+    doc.setTextColor(34, 197, 94);
+    doc.text(`Médiane: ${mediane}/20`, 105, statsY);
+    doc.setTextColor(107, 114, 128);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Min: ${min}`, 150, statsY);
+    doc.text(`Max: ${max}`, 175, statsY);
+
+    // Ligne 2 : Répartition niveaux avec couleurs
+    const niveauY = 76;
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(34, 197, 94); // Vert TBM
+    doc.text(`TBM: ${tbm} (${Math.round(tbm/candidats.length*100)}%)`, 25, niveauY);
+    doc.setTextColor(59, 130, 246); // Bleu MS
+    doc.text(`MS: ${ms} (${Math.round(ms/candidats.length*100)}%)`, 70, niveauY);
+    doc.setTextColor(245, 158, 11); // Orange MF
+    doc.text(`MF: ${mf} (${Math.round(mf/candidats.length*100)}%)`, 115, niveauY);
+    doc.setTextColor(239, 68, 68); // Rouge MI
+    doc.text(`MI: ${mi} (${Math.round(mi/candidats.length*100)}%)`, 160, niveauY);
+
+    // === TABLEAU DES ÉLÈVES ===
+    candidats.sort((a, b) => {
+        if (a.classe !== b.classe) return a.classe.localeCompare(b.classe);
+        return a.nom.localeCompare(b.nom);
+    });
 
     const tableData = candidats.map(c => [
         c.numero,
@@ -1756,20 +1803,63 @@ function generateClassPDF() {
         c.niveau
     ]);
 
+    // Couleurs par niveau pour les cellules
+    const niveauColors = {
+        'TBM': [220, 252, 231], // Vert clair
+        'MS': [219, 234, 254],  // Bleu clair
+        'MF': [254, 243, 199],  // Orange clair
+        'MI': [254, 226, 226]   // Rouge clair
+    };
+
     doc.autoTable({
-        startY: 60,
-        head: [['N°', 'Nom Prénom', 'Classe', 'Note /20', 'Niveau']],
+        startY: 90,
+        head: [['N°', 'Nom Prénom', 'Classe', 'Note', 'Niveau']],
         body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [102, 126, 234] },
+        theme: 'grid',
+        headStyles: {
+            fillColor: [102, 126, 234],
+            textColor: 255,
+            fontStyle: 'bold',
+            halign: 'center'
+        },
+        styles: {
+            fontSize: 9,
+            cellPadding: 3
+        },
         columnStyles: {
-            0: { cellWidth: 15 },
-            1: { cellWidth: 70 },
-            2: { cellWidth: 25 },
-            3: { cellWidth: 25, halign: 'center' },
-            4: { cellWidth: 30, halign: 'center' }
+            0: { cellWidth: 15, halign: 'center' },
+            1: { cellWidth: 65 },
+            2: { cellWidth: 28, halign: 'center' },
+            3: { cellWidth: 20, halign: 'center', fontStyle: 'bold' },
+            4: { cellWidth: 22, halign: 'center', fontStyle: 'bold' }
+        },
+        didParseCell: function(data) {
+            // Colorer la colonne Niveau
+            if (data.section === 'body' && data.column.index === 4) {
+                const niveau = data.cell.raw;
+                if (niveauColors[niveau]) {
+                    data.cell.styles.fillColor = niveauColors[niveau];
+                }
+            }
+            // Colorer la note selon le niveau
+            if (data.section === 'body' && data.column.index === 3) {
+                const niveau = tableData[data.row.index][4];
+                if (niveau === 'TBM') data.cell.styles.textColor = [22, 163, 74];
+                else if (niveau === 'MS') data.cell.styles.textColor = [37, 99, 235];
+                else if (niveau === 'MF') data.cell.styles.textColor = [217, 119, 6];
+                else if (niveau === 'MI') data.cell.styles.textColor = [220, 38, 38];
+            }
+        },
+        alternateRowStyles: {
+            fillColor: [249, 250, 251]
         }
     });
+
+    // === PIED DE PAGE ===
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(8);
+    doc.setTextColor(156, 163, 175);
+    doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')} - DNB Blanc 25-26`, pageWidth / 2, finalY, { align: 'center' });
 
     doc.save(`Bilan_Classe_${className.replace(/\s/g, '_')}.pdf`);
 }
