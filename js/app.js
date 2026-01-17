@@ -4136,6 +4136,7 @@ function renderExerciseTabs() {
 
         const button = document.createElement('button');
         button.className = `main-tab ${isFirst ? 'active' : ''}`;
+        button.dataset.tab = `exercise${exerciseNum}`;
         button.onclick = () => showTab(`exercise${exerciseNum}`);
 
         button.innerHTML = `
@@ -4379,18 +4380,14 @@ function showTab(tabName) {
     // Réinitialiser la compétence en cours quand on change d'exercice
     currentlyEditingCompetence = null;
     
-    // Mise à jour des onglets - méthode compatible avec les onglets dynamiques
+    // Mise à jour des onglets - utiliser data-tab pour identifier l'onglet actif
     document.querySelectorAll('.main-tab').forEach(tab => {
         tab.classList.remove('active');
+        // Utiliser data-tab pour trouver le bon onglet
+        if (tab.dataset.tab === tabName) {
+            tab.classList.add('active');
+        }
     });
-    
-    // Trouver l'onglet correspondant par son onclick
-    const targetTab = Array.from(document.querySelectorAll('.main-tab')).find(tab => {
-        return tab.onclick && tab.onclick.toString().includes(`showTab('${tabName}')`);
-    });
-    if (targetTab) {
-        targetTab.classList.add('active');
-    }
 
     // Mise à jour du contenu
     document.querySelectorAll('.tab-content').forEach(content => {

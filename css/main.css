@@ -502,28 +502,42 @@
         }
 
         .main-tab {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border: 2px solid transparent;
+            border-radius: 10px;
             background: #f8f9fa;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             white-space: nowrap;
-            font-weight: 500;
+            font-weight: 600;
             color: #6c757d;
-            font-size: 0.9em;
+            font-size: 1em;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+        }
+
+        .main-tab:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+            transform: translateY(-1px);
         }
 
         .main-tab.active {
-            background: #4285f4;
+            background: linear-gradient(135deg, #4285f4, #1a73e8);
             color: white;
+            border-color: #1a73e8;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .main-tab.active:hover {
+            background: linear-gradient(135deg, #5a95f5, #4285f4);
+            box-shadow: 0 6px 16px rgba(66, 133, 244, 0.5);
         }
 
         .tab-icon {
-            font-size: 16px;
+            font-size: 18px;
         }
 
         /* === CONTENU DES ONGLETS === */
