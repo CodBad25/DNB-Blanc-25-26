@@ -6566,14 +6566,7 @@ function validateCorrection() {
     diagnoseCandidateProgress(candidate.number);
     
     const details = calculateCandidateDetails(candidate.number);
-    
-    // Vérifier si toutes les questions sont traitées
-    if (details.questionsAnswered < details.totalQuestions) {
-        if (!confirm(`Attention ! Seulement ${details.questionsAnswered}/${details.totalQuestions} questions ont été traitées.\n\nVoulez-vous vraiment valider cette correction incomplète ?`)) {
-            return;
-        }
-    }
-    
+
     // Calculer les scores par compétence
     const competencesScores = calculateCompetencesScores(candidate.number);
     
